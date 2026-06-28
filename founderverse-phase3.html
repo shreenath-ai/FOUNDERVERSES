@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FounderVerse AI — The AI Startup Accountability System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050816;--bg2:#080d1f;--bg3:#0c1228;
+  --teal:#00d4c8;--teal2:#00f5e4;
+  --amber:#ffb340;--coral:#ff4d6d;--mint:#00e5a0;--purple:#8b83e8;
+  --text:#e8f0ff;--text2:#8899bb;--text3:#4a5a80;
+  --border:rgba(0,212,200,0.12);--border2:rgba(0,212,200,0.25);
+  --card:rgba(12,20,44,0.85);
+  --font-head:'Syne',sans-serif;--font-body:'Outfit',sans-serif;--font-mono:'DM Mono',monospace;
+}
+html,body{width:100%;min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font-body);overflow-x:hidden}
+
+/* CURSOR */
+#cursor{position:fixed;width:18px;height:18px;border:1.5px solid var(--teal);border-radius:50%;pointer-events:none;z-index:9999;mix-blend-mode:screen;transform:translate(-50%,-50%);transition:transform .1s}
+#cursor.hover{transform:translate(-50%,-50%) scale(2.2);border-color:var(--teal2)}
+#cglow{position:fixed;width:300px;height:300px;border-radius:50%;pointer-events:none;z-index:9990;background:radial-gradient(circle,rgba(0,212,200,0.04),transparent 70%);transform:translate(-50%,-50%)}
+
+/* BACKGROUND */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.pt{position:absolute;border-radius:50%;animation:ptUp linear infinite}
+@keyframes ptUp{0%{transform:translateY(100vh) translateX(0);opacity:0}10%{opacity:.8}90%{opacity:.2}100%{transform:translateY(-40px) translateX(var(--dx));opacity:0}}
+.gridbg{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(0,212,200,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,200,.025) 1px,transparent 1px);background-size:64px 64px}
+.scanline{position:fixed;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,200,.15) 30%,rgba(0,229,160,.15) 70%,transparent);animation:scan 8s linear infinite;pointer-events:none;z-index:1}
+@keyframes scan{0%{top:-2px;opacity:0}5%{opacity:1}95%{opacity:.3}100%{top:100vh;opacity:0}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:0 2.5rem;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(5,8,22,.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--teal);letter-spacing:-.02em;cursor:pointer;user-select:none}
+.nav-logo span{color:rgba(232,240,255,.4)}
+.nav-badge{font-family:var(--font-mono);font-size:9px;color:var(--mint);background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);padding:3px 8px;border-radius:100px;letter-spacing:.1em;margin-left:8px;vertical-align:middle}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-lk{font-size:11px;color:var(--text2);cursor:pointer;transition:color .2s;letter-spacing:.08em;font-family:var(--font-mono);text-transform:uppercase}
+.nav-lk:hover{color:var(--teal)}
+.nav-demo{background:rgba(255,179,64,.08);color:var(--amber);padding:8px 16px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(255,179,64,.25);transition:all .25s;font-family:var(--font-mono);letter-spacing:.04em}
+.nav-demo:hover{background:rgba(255,179,64,.16)}
+.nav-cta{background:var(--teal);color:var(--bg);padding:8px 20px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .25s;font-family:var(--font-body)}
+.nav-cta:hover{background:var(--teal2);transform:translateY(-1px);box-shadow:0 8px 28px rgba(0,212,200,.3)}
+
+/* PAGES */
+.page{display:none;min-height:100vh;position:relative;z-index:1;padding-top:64px}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* BUTTONS */
+.btn-p{background:linear-gradient(135deg,var(--teal),var(--mint));color:var(--bg);padding:14px 32px;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer;border:none;transition:all .3s;font-family:var(--font-body);letter-spacing:-.01em}
+.btn-p:hover{transform:translateY(-3px);box-shadow:0 20px 60px rgba(0,212,200,.35)}
+.btn-g{background:transparent;color:var(--teal);padding:14px 32px;border-radius:9px;font-weight:600;font-size:15px;cursor:pointer;border:1px solid rgba(0,212,200,.3);transition:all .3s;font-family:var(--font-body)}
+.btn-g:hover{background:rgba(0,212,200,.07);transform:translateY(-3px)}
+
+/* PAGE NAV BAR */
+.pg-nav{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 2rem;background:rgba(5,8,22,.95);border-top:1px solid var(--border);position:sticky;bottom:0;z-index:50;backdrop-filter:blur(20px)}
+.pg-nav-lbl{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase}
+.pg-btns{display:flex;gap:.75rem}
+.pg-btn{padding:8px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;font-family:var(--font-body)}
+.pg-back{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.pg-back:hover{border-color:var(--border2);color:var(--text)}
+.pg-next{background:var(--teal);color:var(--bg);border:none}
+.pg-next:hover{background:var(--teal2);transform:translateY(-1px)}
+.pg-next:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed;transform:none}
+
+/* WRAP */
+.wrap{max-width:1300px;margin:0 auto;padding:2.5rem 2rem 5rem}
+.wrap-sm{max-width:820px;margin:0 auto;padding:3rem 2rem 6rem}
+
+/* SECTION LABELS */
+.eyebrow{font-family:var(--font-mono);font-size:10px;color:var(--teal);letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px}
+.section-title{font-family:var(--font-head);font-size:clamp(24px,3.5vw,40px);font-weight:800;letter-spacing:-.035em;line-height:1.05;margin-bottom:.5rem}
+
+/* DOTS LOADER */
+.dots span{animation:dotBlink .8s infinite;display:inline-block}
+.dots span:nth-child(2){animation-delay:.15s}
+.dots span:nth-child(3){animation-delay:.3s}
+@keyframes dotBlink{0%,100%{opacity:.2}50%{opacity:1}}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.35);border-radius:12px;padding:1rem 1.5rem;font-family:var(--font-mono);font-size:13px;color:var(--coral);z-index:600;transition:transform .4s ease;max-width:500px;text-align:center;backdrop-filter:blur(10px)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* API MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(5,8,22,.95);backdrop-filter:blur(12px);z-index:1000;display:none;align-items:center;justify-content:center;padding:2rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:22px;padding:2.5rem;max-width:520px;width:100%;animation:fadeUp .4s ease both}
+.modal-title{font-family:var(--font-head);font-size:24px;font-weight:800;letter-spacing:-.025em;margin-bottom:.5rem}
+.modal-sub{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:1.75rem}
+.modal-inp-wrap{position:relative;margin-bottom:1.25rem}
+.modal-inp{width:100%;background:rgba(8,13,31,.9);border:1px solid var(--border);border-radius:10px;padding:13px 46px 13px 17px;color:var(--text);font-family:var(--font-mono);font-size:13px;outline:none;transition:all .25s}
+.modal-inp:focus{border-color:rgba(0,212,200,.5);box-shadow:0 0 0 3px rgba(0,212,200,.07)}
+.modal-inp::placeholder{color:var(--text3)}
+.modal-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--text3);font-size:15px;user-select:none}
+.modal-note{font-family:var(--font-mono);font-size:11px;color:var(--text3);line-height:1.7;margin-bottom:1.75rem;padding:.9rem 1.1rem;background:rgba(0,212,200,.04);border-radius:9px;border:1px solid var(--border)}
+.modal-btns{display:flex;gap:.75rem}
+.modal-btn-p{flex:1;padding:13px;background:linear-gradient(135deg,var(--teal),var(--mint));color:var(--bg);border:none;border-radius:10px;font-family:var(--font-head);font-size:15px;font-weight:800;cursor:pointer;transition:all .25s}
+.modal-btn-p:hover{transform:translateY(-1px);box-shadow:0 12px 40px rgba(0,212,200,.3)}
+.modal-btn-g{padding:13px 20px;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:10px;font-family:var(--font-body);font-size:14px;cursor:pointer;transition:all .25s}
+.modal-btn-g:hover{border-color:var(--border2);color:var(--text)}
+
+/* ═══════════ LANDING ═══════════ */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4rem 2rem 6rem;position:relative;overflow:hidden}
+.hero-orb{position:absolute;width:850px;height:850px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,200,.07),rgba(0,229,160,.03) 40%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;animation:orbBreath 9s ease-in-out infinite}
+@keyframes orbBreath{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.1)}}
+.hero-ring{position:absolute;border-radius:50%;border:1px solid;pointer-events:none;top:50%;left:50%;animation:ringRot linear infinite}
+@keyframes ringRot{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,212,200,.07);border:1px solid rgba(0,212,200,.2);padding:7px 18px;border-radius:100px;font-family:var(--font-mono);font-size:11px;color:var(--teal);letter-spacing:.12em;margin-bottom:2rem;animation:fadeUp .9s ease both}
+.hero-badge-dot{width:6px;height:6px;background:var(--teal);border-radius:50%;animation:dotPulse 2s infinite}
+@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.6)}}
+.hero h1{font-family:var(--font-head);font-size:clamp(44px,7.5vw,96px);font-weight:800;line-height:.95;letter-spacing:-.045em;margin-bottom:1.75rem;animation:fadeUp .9s .1s ease both}
+.hero h1 .l1{display:block;color:var(--text)}
+.hero h1 .l2{display:block;background:linear-gradient(130deg,var(--teal) 0%,var(--mint) 50%,var(--teal2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(16px,2vw,21px);color:var(--text2);max-width:580px;line-height:1.75;margin-bottom:2.75rem;font-weight:300;animation:fadeUp .9s .2s ease both}
+.hero-acts{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;animation:fadeUp .9s .3s ease both}
+.hero-phase3-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.2);border-radius:12px;padding:11px 20px;margin-bottom:1.5rem;animation:fadeUp .9s .45s ease both}
+.hp3-dot{width:8px;height:8px;background:var(--mint);border-radius:50%;box-shadow:0 0 8px var(--mint);animation:dotPulse 1.5s infinite}
+.hp3-text{font-family:var(--font-mono);font-size:12px;color:var(--mint);letter-spacing:.08em}
+.stats-row{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:1.75rem 2rem;display:flex;justify-content:center;gap:4rem;flex-wrap:wrap}
+.stat-item .sn{font-family:var(--font-head);font-size:30px;font-weight:800;color:var(--teal);line-height:1}
+.stat-item .sl{font-size:10px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;font-family:var(--font-mono);margin-top:5px}
+.land-sec{padding:5.5rem 2rem;max-width:1200px;margin:0 auto}
+.land-sec-full{padding:5.5rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2)}
+.lsf-inner{max-width:1200px;margin:0 auto;padding:0 2.5rem}
+.land-h2{font-family:var(--font-head);font-size:clamp(30px,4vw,52px);font-weight:800;letter-spacing:-.035em;margin-bottom:1.25rem;line-height:1.05}
+.land-sub{font-size:17px;color:var(--text2);max-width:580px;line-height:1.75;margin-bottom:3.5rem;font-weight:300}
+.agents-preview{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:.85rem}
+.ap-card{background:rgba(8,13,31,.8);border:1px solid var(--border);border-radius:16px;padding:1.4rem;text-align:center;transition:all .4s;cursor:default}
+.ap-card:hover{transform:translateY(-5px)}
+.ap-av{width:58px;height:58px;border-radius:50%;margin:0 auto .9rem;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:18px;font-weight:800;position:relative}
+.ap-ring{position:absolute;inset:-3px;border-radius:50%;border:1.5px solid;opacity:.35;animation:ringRot 6s linear infinite}
+.ap-name{font-family:var(--font-head);font-size:13px;font-weight:700;margin-bottom:3px}
+.ap-role{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin-bottom:.65rem}
+.ap-quote{font-size:11px;color:var(--text2);line-height:1.5;font-style:italic}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.1rem}
+.feat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.6rem;transition:all .35s}
+.feat-card:hover{border-color:var(--border2);transform:translateY(-4px)}
+.feat-num{font-family:var(--font-mono);font-size:11px;color:var(--teal);letter-spacing:.1em;margin-bottom:.75rem}
+.feat-title{font-family:var(--font-head);font-size:15px;font-weight:700;margin-bottom:.5rem;letter-spacing:-.01em}
+.feat-desc{font-size:13px;color:var(--text2);line-height:1.6}
+.feat-badge{display:inline-block;margin-top:.75rem;padding:3px 10px;border-radius:100px;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em}
+.cta-section{padding:7rem 2rem;text-align:center;position:relative;overflow:hidden}
+.cta-orb{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,200,.07),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+
+/* ═══════════ SUBMISSION ═══════════ */
+.sub-wrap{max-width:700px;margin:0 auto;padding:4rem 2rem 6rem}
+.sub-hdr{text-align:center;margin-bottom:2.75rem}
+.sub-hdr .sub-lbl{font-family:var(--font-mono);font-size:11px;color:var(--teal);letter-spacing:.18em;margin-bottom:1rem}
+.sub-hdr h1{font-family:var(--font-head);font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-.035em;margin-bottom:.75rem}
+.sub-hdr p{font-size:15px;color:var(--text2);font-weight:300;line-height:1.7}
+.stakes-box{background:rgba(0,212,200,.05);border:1px solid rgba(0,212,200,.15);border-radius:10px;padding:1rem 1.4rem;font-family:var(--font-mono);font-size:12px;color:var(--teal);letter-spacing:.04em;text-align:center;margin-bottom:2.5rem;line-height:1.65}
+.demo-bar{background:rgba(255,179,64,.05);border:1px solid rgba(255,179,64,.18);border-radius:12px;padding:1rem 1.4rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.demo-bar-text{font-size:13px;color:var(--text2);font-family:var(--font-mono);letter-spacing:.03em}
+.demo-bar-text strong{color:var(--amber)}
+.demo-bar-btn{background:rgba(255,179,64,.1);color:var(--amber);border:1px solid rgba(255,179,64,.3);padding:7px 15px;border-radius:8px;font-size:11px;font-family:var(--font-mono);cursor:pointer;transition:all .2s;letter-spacing:.04em}
+.demo-bar-btn:hover{background:rgba(255,179,64,.2)}
+.prog-bar-row{display:flex;align-items:center;gap:1rem;margin-bottom:2rem;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:.85rem 1.2rem}
+.prog-bar-lbl{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.1em;white-space:nowrap}
+.prog-bar-track{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.prog-bar-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--mint));border-radius:2px;width:0%;transition:width .4s ease}
+.prog-bar-pct{font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--teal);min-width:34px;text-align:right}
+.sim-quality-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;padding:.85rem 1.2rem;background:var(--bg2);border:1px solid var(--border);border-radius:10px}
+.sq-lbl{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.1em}
+.sq-val{font-family:var(--font-mono);font-size:12px;font-weight:700;transition:color .3s}
+.fg{margin-bottom:1.85rem}
+.fl{display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:.75rem}
+.fl-hint{color:var(--text3);font-size:10px;letter-spacing:.04em;text-transform:none;font-style:italic}
+.fi{width:100%;background:rgba(8,13,31,.9);border:1px solid var(--border);border-radius:10px;padding:13px 17px;color:var(--text);font-family:var(--font-body);font-size:15px;transition:all .25s;outline:none;-webkit-appearance:none}
+.fi:focus{border-color:rgba(0,212,200,.5);box-shadow:0 0 0 3px rgba(0,212,200,.07)}
+.fi::placeholder{color:var(--text3)}
+textarea.fi{resize:vertical;min-height:86px;line-height:1.65}
+select.fi{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a5a80' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 15px center;padding-right:40px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.char-ct{font-family:var(--font-mono);font-size:10px;color:var(--text3);text-align:right;margin-top:4px}
+.chips-box{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:1.2rem;margin-bottom:1.5rem}
+.chips-lbl{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.85rem}
+.chips-row{display:flex;flex-wrap:wrap;gap:.5rem}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:100px;font-size:10px;font-family:var(--font-mono);border:1px solid transparent}
+.chip-av{width:17px;height:17px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:800}
+.sub-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--teal),var(--mint));color:var(--bg);border:none;border-radius:11px;font-family:var(--font-head);font-size:16px;font-weight:800;cursor:pointer;transition:all .3s;letter-spacing:-.02em;margin-top:.75rem}
+.sub-btn:hover{transform:translateY(-2px);box-shadow:0 20px 60px rgba(0,212,200,.35)}
+.sub-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.sub-note{text-align:center;font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-top:.9rem;letter-spacing:.05em;line-height:1.8}
+
+/* ═══════════ WAR ROOM LOADING ═══════════ */
+#loading{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;position:relative;overflow:hidden;padding-top:80px}
+#loading.active{display:flex}
+.ld-classified{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.25em;margin-bottom:4px;animation:fadeIn .5s ease both}
+.ld-simid{font-family:var(--font-mono);font-size:13px;color:var(--teal);letter-spacing:.15em;margin-bottom:4px;animation:fadeIn .5s .3s ease both;opacity:0}
+.ld-clearance{font-family:var(--font-mono);font-size:11px;color:rgba(0,212,200,.4);letter-spacing:.18em;margin-bottom:2.5rem;animation:fadeIn .5s .6s ease both;opacity:0}
+.ld-title{font-family:var(--font-head);font-size:clamp(22px,4vw,40px);font-weight:800;letter-spacing:-.035em;margin-bottom:8px;text-align:center;line-height:1.1}
+.ld-phase{font-size:13px;color:var(--text2);margin-bottom:2rem;font-family:var(--font-mono);letter-spacing:.06em;text-align:center;min-height:20px;transition:opacity .3s}
+.asm-row{display:flex;gap:1.25rem;flex-wrap:wrap;justify-content:center;margin-bottom:1.75rem;max-width:700px}
+.asm-agent{display:flex;flex-direction:column;align-items:center;gap:5px;opacity:0;animation:agentPop .55s ease both}
+@keyframes agentPop{from{opacity:0;transform:translateY(18px) scale(.75)}to{opacity:1;transform:none}}
+.asm-av{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:15px;font-weight:800;position:relative;border:1px solid rgba(255,255,255,.08)}
+.asm-av-ring{position:absolute;inset:-4px;border-radius:50%;border:1px solid;opacity:.4;animation:ringRot 5s linear infinite}
+.asm-role{font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:.06em;text-transform:uppercase}
+.asm-voice{font-size:10px;font-family:var(--font-mono);font-style:italic;text-align:center;max-width:82px;line-height:1.35;opacity:0;transition:opacity .5s ease;min-height:30px}
+.assembled-moment{display:none;flex-direction:column;align-items:center;gap:.6rem;margin-bottom:1.75rem;animation:fadeUp .6s ease both}
+.asm-glow-text{font-family:var(--font-head);font-size:clamp(18px,3vw,30px);font-weight:800;letter-spacing:-.03em;color:var(--teal);text-shadow:0 0 40px rgba(0,212,200,.6);text-align:center}
+.asm-sub-text{font-family:var(--font-mono);font-size:11px;color:var(--text2);letter-spacing:.12em;text-transform:uppercase}
+.asm-hr{width:180px;height:1px;background:linear-gradient(90deg,transparent,var(--teal),transparent)}
+.ap-grid{display:flex;gap:.65rem;flex-wrap:wrap;justify-content:center;max-width:600px;margin-bottom:1.75rem}
+.ap-item{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:66px}
+.ap-label{font-family:var(--font-mono);font-size:8px;letter-spacing:.05em;text-transform:uppercase}
+.ap-track{width:58px;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.ap-fill{height:100%;border-radius:2px;width:0%;transition:width .4s ease}
+.ap-stat{font-family:var(--font-mono);font-size:8px;color:var(--text3)}
+.ld-feed{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.4rem;max-width:500px;width:100%;margin-bottom:1.75rem;max-height:140px;overflow:hidden}
+.feed-line{font-family:var(--font-mono);font-size:11px;color:var(--text2);padding:3px 0;display:flex;align-items:center;gap:8px;opacity:0;animation:feedIn .4s ease both}
+@keyframes feedIn{from{opacity:0;transform:translateX(-10px)}to{opacity:.85;transform:none}}
+.feed-pip{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.ld-prog-wrap{width:100%;max-width:500px}
+.ld-prog-meta{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.06em;margin-bottom:7px}
+.ld-prog-track{width:100%;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.ld-prog-bar{height:100%;background:linear-gradient(90deg,var(--teal),var(--mint));border-radius:2px;width:0%;transition:width .5s ease}
+
+/* ═══════════ BOARD DASHBOARD ═══════════ */
+.critical-hero{background:linear-gradient(135deg,rgba(255,77,109,.07),rgba(255,77,109,.03));border:1px solid rgba(255,77,109,.22);border-left:3px solid var(--coral);border-radius:18px;padding:2rem;margin-bottom:2.5rem;position:relative;overflow:hidden;animation:fadeUp .6s ease both}
+.ch-glow{position:absolute;right:-30px;top:-30px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,77,109,.1),transparent 70%);pointer-events:none}
+.ch-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,77,109,.1);border-radius:100px;padding:4px 12px;font-family:var(--font-mono);font-size:10px;color:var(--coral);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.85rem}
+.ch-pulse{width:5px;height:5px;border-radius:50%;background:var(--coral);animation:dotPulse 1.5s infinite}
+.ch-text{font-family:var(--font-head);font-size:clamp(16px,2.5vw,24px);font-weight:800;color:var(--text);letter-spacing:-.025em;line-height:1.25;margin-bottom:.5rem}
+.ch-sub{font-size:13px;color:var(--text2);font-family:var(--font-mono);letter-spacing:.03em}
+.bd-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2rem;gap:1.5rem;flex-wrap:wrap}
+.bd-left .bd-eyebrow{font-family:var(--font-mono);font-size:10px;color:var(--teal);letter-spacing:.15em;text-transform:uppercase;margin-bottom:7px}
+.bd-left h1{font-family:var(--font-head);font-size:clamp(22px,3.2vw,36px);font-weight:800;letter-spacing:-.035em;margin-bottom:5px}
+.bd-left .bd-meta{font-size:12px;color:var(--text2);font-family:var(--font-mono);letter-spacing:.04em}
+.score-cards{display:flex;gap:.85rem;flex-wrap:wrap}
+.sc-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:1.3rem 1.65rem;text-align:center;min-width:105px}
+.sc-card .sc-num{font-family:var(--font-head);font-size:42px;font-weight:800;line-height:1;transition:color .3s}
+.sc-card .sc-lbl{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.1em;margin-top:5px}
+.narrative-box{background:var(--bg2);border:1px solid var(--border);border-left:2px solid var(--teal);border-radius:14px;padding:1.4rem;margin-bottom:2rem}
+.nb-label{font-family:var(--font-mono);font-size:10px;color:var(--teal);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.75rem}
+.nb-text{font-size:14px;color:var(--text2);line-height:1.75;font-style:italic}
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:1.2rem;margin-bottom:2.5rem}
+.afc{background:var(--card);border:1px solid var(--border);border-top-width:2px;border-radius:18px;padding:1.55rem;transition:all .3s;overflow:hidden;opacity:0;transform:translateY(14px)}
+.afc.vis{opacity:1;transform:none;transition:opacity .5s ease,transform .5s ease}
+.afc:hover{border-bottom-color:rgba(0,212,200,.2);transform:translateY(-3px)}
+.afc-hdr{display:flex;align-items:center;gap:.9rem;margin-bottom:.7rem}
+.afc-av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:15px;flex-shrink:0}
+.afc-info h3{font-family:var(--font-head);font-size:14px;font-weight:700;letter-spacing:-.01em}
+.afc-info .afc-role{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin-top:2px}
+.afc-score-badge{padding:5px 11px;border-radius:100px;font-family:var(--font-mono);font-size:13px;font-weight:700;margin-left:auto;flex-shrink:0}
+.afc-bar-track{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:.9rem}
+.afc-bar-fill{height:100%;border-radius:2px;width:0%;transition:width 1.2s ease}
+.afc-verdict{font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:.8rem}
+.afc-secs{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.8rem}
+.afc-sec-item{font-size:12px;color:var(--text2);display:flex;gap:6px;line-height:1.5}
+.afc-sec-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.afc-tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{padding:3px 9px;border-radius:100px;font-size:10px;font-family:var(--font-mono);letter-spacing:.03em}
+.afc-rec{margin-top:.85rem;padding:.75rem;background:rgba(0,212,200,.05);border-radius:8px;border-left:2px solid var(--teal);font-size:12px;color:var(--teal);line-height:1.6}
+.afc-rec-label{font-family:var(--font-mono);font-size:9px;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;opacity:.7}
+.tension-box{background:rgba(255,179,64,.04);border:1px solid rgba(255,179,64,.16);border-radius:18px;padding:1.85rem;margin-bottom:2.5rem}
+.tension-hdr{display:flex;align-items:center;gap:.9rem;margin-bottom:1.4rem}
+.tension-icon{width:33px;height:33px;background:rgba(255,179,64,.1);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.tension-hdr-text h3{font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--amber);letter-spacing:-.01em}
+.tension-hdr-text p{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:2px}
+.tension-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:.9rem}
+.ti{background:rgba(0,0,0,.2);border-radius:11px;padding:1.05rem}
+.ti .ti-lbl{font-family:var(--font-mono);font-size:10px;color:var(--amber);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+.ti-sides{display:flex;gap:.45rem;margin-bottom:.55rem}
+.ti-side{flex:1;background:rgba(255,179,64,.05);border-radius:7px;padding:.45rem .55rem;font-size:11px;color:var(--text2);line-height:1.4}
+.ti-side strong{display:block;font-family:var(--font-mono);font-size:9px;color:var(--amber);letter-spacing:.06em;margin-bottom:2px}
+.ti-dec{font-size:12px;color:var(--text);line-height:1.5;border-top:1px solid rgba(255,179,64,.1);padding-top:.55rem}
+.ti-dec strong{color:var(--amber);font-size:10px;font-family:var(--font-mono);display:block;margin-bottom:2px}
+.swot-label-row{font-family:var(--font-mono);font-size:10px;color:var(--teal);letter-spacing:.18em;text-transform:uppercase;margin-bottom:1.1rem}
+.swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:18px;overflow:hidden;margin-bottom:2.5rem}
+.swot-cell{padding:1.6rem;background:var(--bg2)}
+.swot-cell-lbl{font-family:var(--font-head);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem}
+.swot-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+.swot-list li{font-size:13px;color:var(--text2);display:flex;align-items:flex-start;gap:8px;line-height:1.55}
+.swot-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0;margin-top:7px}
+
+/* ═══════════ BLIND SPOT PAGE ═══════════ */
+.bs-reveal-wrap{max-width:820px;margin:0 auto;padding:2.5rem 2rem 5rem}
+.bs-intro{text-align:center;margin-bottom:3rem}
+.bs-pre-text{font-family:var(--font-mono);font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:.5rem;letter-spacing:.04em}
+.bs-gaps{display:flex;flex-direction:column;gap:1.1rem;margin-bottom:2.5rem}
+.bs-gap-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:1.6rem;opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease}
+.bs-gap-card.vis{opacity:1;transform:none}
+.bsgc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.bsgc-name{font-family:var(--font-head);font-size:15px;font-weight:700;letter-spacing:-.01em}
+.bsgc-sev-wrap{display:flex;align-items:center;gap:.6rem}
+.bsgc-sev-label{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.08em}
+.bsgc-sev-num{font-family:var(--font-head);font-size:22px;font-weight:800;line-height:1}
+.bsgc-sev-track{width:80px;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:3px}
+.bsgc-sev-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.bsgc-body{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:.9rem}
+.bsgc-side{background:rgba(0,0,0,.2);border-radius:10px;padding:.9rem}
+.bsgc-side-lbl{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem;opacity:.7}
+.bsgc-side-text{font-size:12px;color:var(--text2);line-height:1.6;font-style:italic}
+.bsgc-why{font-size:12px;color:var(--text2);line-height:1.6;padding:.75rem;background:rgba(0,0,0,.15);border-radius:8px;border-top:1px solid var(--border)}
+.bsgc-why-label{font-family:var(--font-mono);font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:.3rem}
+
+/* THE BIG REVEAL */
+.bs-reveal-card{background:var(--bg2);border:1px solid var(--border2);border-radius:24px;padding:3rem 2.5rem;text-align:center;position:relative;overflow:hidden;margin-bottom:2.5rem;opacity:0;transition:opacity .6s ease}
+.bs-reveal-card.vis{opacity:1}
+.bsr-glow{position:absolute;width:400px;height:400px;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;animation:orbBreath 6s ease-in-out infinite}
+.bsr-label{font-family:var(--font-mono);font-size:11px;color:var(--teal);letter-spacing:.18em;text-transform:uppercase;margin-bottom:1.25rem;position:relative}
+.bsr-score-wrap{position:relative;margin-bottom:1.5rem}
+.bsr-score{font-family:var(--font-head);font-size:clamp(64px,12vw,120px);font-weight:800;line-height:1;letter-spacing:-.05em;position:relative}
+.bsr-score-denom{font-family:var(--font-mono);font-size:20px;color:var(--text3);vertical-align:super}
+.bsr-benchmark{font-family:var(--font-mono);font-size:13px;color:var(--text2);letter-spacing:.05em;margin-bottom:.5rem;position:relative}
+.bsr-zone{display:inline-block;padding:5px 14px;border-radius:100px;font-family:var(--font-head);font-size:14px;font-weight:700;letter-spacing:.02em;margin-bottom:1rem;position:relative}
+.bsr-context{font-size:14px;color:var(--text2);max-width:480px;margin:0 auto;line-height:1.7;position:relative}
+
+/* ═══════════ SIMULATION PAGE ═══════════ */
+.sim-wrap{max-width:1300px;margin:0 auto;padding:2.5rem 2rem 5rem}
+.single-decision-card{background:linear-gradient(135deg,rgba(0,212,200,.07),rgba(0,229,160,.04));border:1px solid rgba(0,212,200,.25);border-radius:20px;padding:2.25rem;margin-bottom:2.5rem;text-align:center;position:relative;overflow:hidden}
+.sdc-orb{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,200,.07),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+.sdc-eyebrow{font-family:var(--font-mono);font-size:10px;color:var(--teal);letter-spacing:.18em;text-transform:uppercase;margin-bottom:1rem;position:relative}
+.sdc-decision{font-family:var(--font-head);font-size:clamp(18px,3vw,28px);font-weight:800;letter-spacing:-.03em;line-height:1.2;color:var(--text);position:relative;max-width:600px;margin:0 auto}
+.timeline-card{background:var(--bg2);border:1px solid var(--border);border-radius:22px;padding:2.25rem;margin-bottom:2.5rem}
+.tl-hdr-meta{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.1em;margin-bottom:2.25rem}
+.tl-track{position:relative;padding:2rem 0}
+.tl-line{position:absolute;top:24px;left:5%;right:5%;height:2px;background:var(--border)}
+.tl-progress-line{position:absolute;top:24px;left:5%;height:2px;background:linear-gradient(90deg,var(--teal),var(--mint));box-shadow:0 0 10px rgba(0,212,200,.4);transition:width 1.5s ease;width:0%}
+.tl-nodes{display:grid;grid-template-columns:repeat(4,1fr);position:relative;z-index:1}
+.tl-node{display:flex;flex-direction:column;align-items:center;gap:.85rem}
+.tl-circle{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;font-weight:700;border:2px solid;position:relative}
+.tl-circle.done{background:var(--bg);border-color:var(--teal);color:var(--teal);box-shadow:0 0 18px rgba(0,212,200,.25)}
+.tl-circle.now{background:var(--teal);border-color:var(--teal);color:var(--bg);box-shadow:0 0 32px rgba(0,212,200,.55);animation:nowPulse 2s ease-in-out infinite}
+.tl-circle.future{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+@keyframes nowPulse{0%,100%{box-shadow:0 0 18px rgba(0,212,200,.35)}50%{box-shadow:0 0 44px rgba(0,212,200,.65)}}
+.tl-info{text-align:center;padding:0 .25rem}
+.tl-period{font-family:var(--font-mono);font-size:9px;color:var(--text3);letter-spacing:.12em;margin-bottom:4px}
+.tl-milestone{font-size:12px;color:var(--text2);max-width:120px;line-height:1.45;margin-bottom:4px}
+.tl-prob{font-family:var(--font-mono);font-size:11px;color:var(--teal);margin-bottom:5px}
+.tl-conf-wrap{display:flex;flex-direction:column;align-items:center;gap:3px}
+.tl-conf-pct{font-family:var(--font-mono);font-size:10px;color:var(--text3)}
+.tl-conf-bar{width:70px;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.tl-conf-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--teal),var(--mint))}
+.scenarios-lbl{font-family:var(--font-mono);font-size:10px;color:var(--teal);letter-spacing:.18em;text-transform:uppercase;margin-bottom:1.2rem}
+.scenarios-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.2rem;margin-bottom:2.5rem}
+.sc-card{border-radius:18px;padding:1.85rem;border:1px solid;transition:all .35s;position:relative;overflow:hidden}
+.sc-card:hover{transform:translateY(-4px)}
+.sc-a{background:rgba(0,229,160,.04);border-color:rgba(0,229,160,.18)}
+.sc-b{background:rgba(255,77,109,.04);border-color:rgba(255,77,109,.18)}
+.sc-c{background:rgba(255,179,64,.04);border-color:rgba(255,179,64,.18)}
+.sc-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem}
+.sc-type-wrap{}
+.sc-type{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px}
+.sc-title-text{font-family:var(--font-head);font-size:19px;font-weight:800;letter-spacing:-.025em;line-height:1.1}
+.sc-prob-wrap{text-align:right;flex-shrink:0}
+.sc-prob-num{font-family:var(--font-head);font-size:32px;font-weight:800;line-height:1}
+.sc-prob-lbl{font-family:var(--font-mono);font-size:9px;color:var(--text3);letter-spacing:.06em;margin-top:2px}
+.sc-story{font-size:13px;color:var(--text2);line-height:1.75;margin-bottom:1.1rem}
+.sc-factors-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem;opacity:.7}
+.sc-factors{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem}
+.sc-factor{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text2)}
+.sc-factor-bar-track{width:60px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.sc-factor-bar{height:100%;border-radius:2px}
+.sc-agents-row{display:flex;gap:5px;flex-wrap:wrap}
+.sc-agent-tag{padding:3px 9px;border-radius:100px;font-size:10px;font-family:var(--font-mono);letter-spacing:.03em}
+
+/* ═══════════ VERDICT PAGE ═══════════ */
+.verdict-wrap{max-width:820px;margin:0 auto;padding:3rem 2rem 6rem}
+.v-eyebrow{font-family:var(--font-mono);font-size:10px;color:var(--teal);letter-spacing:.2em;text-transform:uppercase;text-align:center;margin-bottom:2rem}
+
+/* MARCUS CARD - THE CLIMAX */
+.marcus-card{text-align:center;padding:3rem 2.5rem;background:var(--bg2);border:1px solid var(--border2);border-radius:26px;position:relative;overflow:hidden;margin-bottom:2rem}
+.marcus-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -10%,rgba(0,212,200,.07),transparent 55%);pointer-events:none}
+.marcus-pre-text{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:1rem;position:relative}
+.marcus-av-wrap{position:relative;width:80px;height:80px;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center}
+.marcus-av{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:26px;font-weight:800;border:2px solid rgba(139,131,232,.4);background:linear-gradient(135deg,rgba(26,10,62,.9),rgba(50,20,100,.9));position:relative;z-index:1;color:#c5bff5}
+.marcus-av-ring{position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(139,131,232,.2);animation:ringRot 8s linear infinite}
+.marcus-name{font-family:var(--font-head);font-size:clamp(18px,2.5vw,24px);font-weight:800;letter-spacing:-.025em;margin-bottom:3px;position:relative}
+.marcus-title{font-family:var(--font-mono);font-size:11px;color:var(--text3);letter-spacing:.1em;margin-bottom:2.5rem;position:relative}
+
+/* SUSPENSE STATE */
+.marcus-suspense{display:block;font-family:var(--font-head);font-size:18px;font-weight:600;color:var(--text2);letter-spacing:-.01em;position:relative}
+
+/* VERDICT REVEAL */
+.verdict-reveal{display:none;position:relative}
+.verdict-decision{font-family:var(--font-head);font-size:clamp(28px,5vw,56px);font-weight:800;letter-spacing:-.045em;margin-bottom:.6rem;line-height:1;animation:verdictDrop .8s cubic-bezier(0.175,0.885,0.32,1.275) both}
+@keyframes verdictDrop{from{opacity:0;transform:scale(.6) translateY(-20px)}to{opacity:1;transform:none}}
+.verdict-amount{font-size:13px;color:var(--text2);font-family:var(--font-mono);letter-spacing:.06em;margin-bottom:2rem}
+.verdict-conditions{text-align:left;background:rgba(0,0,0,.28);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem}
+.vc-lbl{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:1rem}
+.vc-item{display:flex;align-items:flex-start;gap:11px;font-size:13px;color:var(--text2);margin-bottom:11px;line-height:1.6}
+.vc-num{width:22px;height:22px;border-radius:50%;background:rgba(0,212,200,.08);border:1px solid rgba(0,212,200,.25);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;color:var(--teal);flex-shrink:0;margin-top:1px}
+.verdict-quote{font-size:14px;color:var(--text2);font-style:italic;line-height:1.75;border-left:2px solid var(--teal);padding-left:1.1rem;text-align:left}
+.wtcmm{background:rgba(0,212,200,.05);border:1px solid rgba(0,212,200,.15);border-radius:12px;padding:1.1rem;margin-top:1.25rem;text-align:left}
+.wtcmm-label{font-family:var(--font-mono);font-size:10px;color:var(--teal);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem}
+.wtcmm-text{font-size:13px;color:var(--teal);line-height:1.65;font-style:italic}
+
+/* UNANIMITY GAUGE */
+.unanimity-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2rem;margin-bottom:2rem}
+.ug-hdr{text-align:center;margin-bottom:1.75rem}
+.ug-title{font-family:var(--font-head);font-size:16px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px}
+.ug-sub{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.1em}
+.ug-gauge-wrap{display:flex;justify-content:center;margin-bottom:1.5rem}
+.ug-gauge{position:relative;width:160px;height:160px}
+.ug-svg{width:100%;height:100%}
+.ug-center-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ug-fraction{font-family:var(--font-head);font-size:36px;font-weight:800;line-height:1;color:var(--text)}
+.ug-denom{font-family:var(--font-mono);font-size:11px;color:var(--text3);letter-spacing:.06em}
+.ug-verdict-label{font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-top:4px;letter-spacing:.08em}
+.ug-agents-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.ug-yes,.ug-no{background:rgba(0,0,0,.2);border-radius:10px;padding:.9rem}
+.ug-agents-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem}
+.ug-agent-list{display:flex;flex-direction:column;gap:.4rem}
+.ug-agent-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)}
+.ug-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:9px;font-weight:800;flex-shrink:0}
+
+/* 30-DAY DIRECTIVES */
+.directives-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2rem;margin-bottom:2rem}
+.directives-hdr{margin-bottom:1.75rem}
+.directives-title{font-family:var(--font-head);font-size:18px;font-weight:800;letter-spacing:-.025em;margin-bottom:.3rem}
+.directives-sub{font-size:13px;color:var(--text2);font-family:var(--font-mono);letter-spacing:.03em}
+.directive-item{display:flex;gap:1.1rem;padding:1.25rem 0;border-bottom:1px solid var(--border);position:relative}
+.directive-item:last-child{border-bottom:none}
+.di-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:13px;font-weight:800;flex-shrink:0;margin-top:2px}
+.di-content{flex:1}
+.di-by{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem;opacity:.8}
+.di-action{font-size:14px;color:var(--text);font-weight:500;line-height:1.55;margin-bottom:.5rem}
+.di-deadline{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;padding:3px 10px;border-radius:100px}
+
+/* ITERATION LOOP */
+.iteration-card{background:linear-gradient(135deg,rgba(0,212,200,.06),rgba(0,229,160,.03));border:1px solid rgba(0,212,200,.2);border-radius:20px;padding:2rem;margin-bottom:2rem;text-align:center}
+.ic-eyebrow{font-family:var(--font-mono);font-size:10px;color:var(--teal);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.75rem}
+.ic-title{font-family:var(--font-head);font-size:22px;font-weight:800;letter-spacing:-.025em;margin-bottom:.5rem}
+.ic-sub{font-size:14px;color:var(--text2);margin-bottom:1.75rem;line-height:1.65}
+.ic-flow{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.75rem}
+.ic-flow-item{background:rgba(0,0,0,.2);border-radius:10px;padding:.75rem 1.25rem;font-family:var(--font-mono);font-size:12px;text-align:center}
+.ic-arrow{color:var(--text3);font-size:18px}
+.ic-btn{background:linear-gradient(135deg,var(--teal),var(--mint));color:var(--bg);border:none;border-radius:9px;padding:13px 28px;font-family:var(--font-head);font-size:15px;font-weight:800;cursor:pointer;transition:all .3s;letter-spacing:-.01em}
+.ic-btn:hover{transform:translateY(-2px);box-shadow:0 16px 50px rgba(0,212,200,.35)}
+
+/* SHARE CARD */
+.share-card{background:linear-gradient(135deg,rgba(0,212,200,.07),rgba(0,229,160,.04));border:1px solid rgba(0,212,200,.2);border-radius:22px;padding:2.5rem;text-align:center;margin-bottom:2rem}
+.share-title{font-family:var(--font-head);font-size:22px;font-weight:800;margin-bottom:.5rem;letter-spacing:-.025em}
+.share-sub{font-size:14px;color:var(--text2);margin-bottom:1.75rem;line-height:1.65}
+.share-actions{display:flex;gap:.9rem;justify-content:center;flex-wrap:wrap}
+.share-btn{padding:10px 24px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;font-family:var(--font-body)}
+
+/* Sim card canvas (hidden) */
+#simCardCanvas{display:none}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  nav{padding:0 1.25rem}
+  .nav-links .nav-lk{display:none}
+  .fr{grid-template-columns:1fr}
+  .swot-grid{grid-template-columns:1fr}
+  .bsgc-body{grid-template-columns:1fr}
+  .ug-agents-row{grid-template-columns:1fr}
+  .ic-flow{flex-direction:column}
+  .wrap,.sim-wrap{padding:1.5rem 1rem 4rem}
+  .bs-reveal-wrap,.verdict-wrap{padding:2rem 1rem 4rem}
+  .marcus-card{padding:2rem 1.25rem}
+  .score-cards{flex-wrap:wrap}
+  .tl-nodes{gap:0}
+}
+</style>
+</head>
+<body>
+
+<!-- BG LAYERS -->
+<div id="cursor"></div><div id="cglow"></div>
+<div class="scanline"></div>
+<div id="particles"></div>
+<div class="gridbg"></div>
+<div class="toast" id="toast"></div>
+<canvas id="simCardCanvas" width="1200" height="630"></canvas>
+
+<!-- API MODAL -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <div style="font-family:var(--font-mono);font-size:11px;color:var(--teal);letter-spacing:.15em;margin-bottom:.75rem">ANTHROPIC API · REQUIRED</div>
+    <div class="modal-title">Connect your board.</div>
+    <div class="modal-sub">FounderVerse Phase 3 uses Claude to power all 10 AI features — 7 board agents, synthesis engine, blind spot analysis, scenario simulation, and the investor term sheet.</div>
+    <div class="modal-inp-wrap">
+      <input class="modal-inp" id="apiKeyInp" type="password" placeholder="sk-ant-api03-...">
+      <span class="modal-eye" onclick="toggleEye()">👁</span>
+    </div>
+    <div class="modal-note">🔒 Key stays in your browser session only — never stored or transmitted beyond api.anthropic.com<br>Get a key at <strong style="color:var(--teal)">console.anthropic.com</strong> → API Keys<br>Or use <strong style="color:var(--amber)">Demo Mode</strong> — no key needed.</div>
+    <div class="modal-btns">
+      <button class="modal-btn-p" onclick="saveKey()">Connect Board →</button>
+      <button class="modal-btn-g" onclick="useDemo()">⚡ Demo Mode</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="goTo('landing')">FOUNDER<span>VERSE</span><span class="nav-badge">PHASE 3</span></div>
+  <div class="nav-links">
+    <span class="nav-lk" onclick="goTo('landing')">Home</span>
+    <span class="nav-lk" onclick="goTo('board')">Board</span>
+    <span class="nav-lk" onclick="goTo('blindspot')">Blind Spot</span>
+    <span class="nav-lk" onclick="goTo('simulation')">Simulation</span>
+    <span class="nav-lk" onclick="goTo('verdict')">Verdict</span>
+    <button class="nav-demo" onclick="runDemo()">⚡ Demo</button>
+    <button class="nav-cta" onclick="goTo('submission')">Simulate →</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════
+     LANDING
+═══════════════════════════════════ -->
+<div id="landing" class="page">
+  <section class="hero">
+    <div class="hero-orb"></div>
+    <div class="hero-ring" style="width:520px;height:520px;border-color:rgba(0,212,200,.06);animation-duration:32s"></div>
+    <div class="hero-ring" style="width:750px;height:750px;border-color:rgba(0,229,160,.04);animation-duration:48s;animation-direction:reverse"></div>
+    <div class="hero-ring" style="width:980px;height:980px;border-color:rgba(0,212,200,.02);animation-duration:65s"></div>
+    <div class="hero-phase3-badge"><div class="hp3-dot"></div><span class="hp3-text">PHASE 3 · ACCOUNTABILITY SYSTEM · 10 AI FEATURES LIVE</span></div>
+    <div class="hero-badge"><div class="hero-badge-dot"></div><span style="opacity:.5">SIMULATION PROTOCOL</span>&nbsp;·&nbsp;v3.0</div>
+    <h1><span class="l1">FounderVerse</span><span class="l2">AI Accountability</span></h1>
+    <p class="hero-sub">Seven AI executives. A Blind Spot Score that tells you what you're wrong about. A simulation of your next 12 months. An investor verdict with real conditions. And a board that changes its mind when you improve.</p>
+    <div class="hero-acts">
+      <button class="btn-p" onclick="goTo('submission')">Run Full Simulation →</button>
+      <button class="btn-g" onclick="runDemo()">⚡ Live Demo</button>
+    </div>
+  </section>
+  <div class="stats-row">
+    <div class="stat-item"><div class="sn">10</div><div class="sl">AI Features</div></div>
+    <div class="stat-item"><div class="sn">8</div><div class="sl">AI Agents</div></div>
+    <div class="stat-item"><div class="sn">3</div><div class="sl">Future Scenarios</div></div>
+    <div class="stat-item"><div class="sn">&lt;25s</div><div class="sl">Full Analysis</div></div>
+    <div class="stat-item"><div class="sn">∞</div><div class="sl">Iterations</div></div>
+  </div>
+  <div class="land-sec">
+    <div class="eyebrow">The Executive Board</div>
+    <h2 class="land-h2">Seven minds. One idea.<br>No mercy.</h2>
+    <p class="land-sub">Each agent has a locked persona, a distinct voice, and a different lens. They run simultaneously — then fight each other in the Tension Engine.</p>
+    <div class="agents-preview" id="landingGrid"></div>
+  </div>
+  <div class="land-sec-full">
+    <div class="lsf-inner">
+      <div class="eyebrow">Phase 3 Features</div>
+      <h2 class="land-h2">Everything a real board delivers.</h2>
+      <p class="land-sub">Not analysis. Accountability.</p>
+      <div class="feature-grid">
+        <div class="feat-card"><div class="feat-num">01</div><div class="feat-title">Founder Blind Spot Score™</div><div class="feat-desc">Compares what you said against what 4 stakeholders heard. Quantifies the gap. Names the delusion.</div><div class="feat-badge" style="background:rgba(255,77,109,.1);color:var(--coral)">SIGNATURE FEATURE</div></div>
+        <div class="feat-card"><div class="feat-num">02</div><div class="feat-title">7-Agent Parallel Board</div><div class="feat-desc">CEO, CFO, CMO, COO, Customer, Competitor, Investor — all running simultaneously in under 20s.</div><div class="feat-badge" style="background:rgba(0,212,200,.08);color:var(--teal)">PHASE 2 CORE</div></div>
+        <div class="feat-card"><div class="feat-num">03</div><div class="feat-title">Tension Engine</div><div class="feat-desc">The 8th synthesis agent finds the 3 sharpest contradictions between board members and names them.</div><div class="feat-badge" style="background:rgba(255,179,64,.1);color:var(--amber)">UNIQUE</div></div>
+        <div class="feat-card"><div class="feat-num">04</div><div class="feat-title">Future Simulation Engine</div><div class="feat-desc">Month 1/3/6/12 projections with confidence decay, board pulse, and milestone tracking.</div><div class="feat-badge" style="background:rgba(0,229,160,.08);color:var(--mint)">NEW</div></div>
+        <div class="feat-card"><div class="feat-num">05</div><div class="feat-title">3-Scenario Engine</div><div class="feat-desc">Breakthrough / Slow Fade / Phoenix Pivot — with weighted probability factors and narrative futures.</div><div class="feat-badge" style="background:rgba(0,229,160,.08);color:var(--mint)">NEW</div></div>
+        <div class="feat-card"><div class="feat-num">06</div><div class="feat-title">The Single Decision</div><div class="feat-desc">One action. At the fork point. The decision that determines which scenario you're in.</div><div class="feat-badge" style="background:rgba(0,212,200,.08);color:var(--teal)">NEW</div></div>
+        <div class="feat-card"><div class="feat-num">07</div><div class="feat-title">Marcus Reid Term Sheet</div><div class="feat-desc">Full investor verdict: FUND / PASS / CONDITIONAL. Real investment amount. Specific conditions. What changes his mind.</div><div class="feat-badge" style="background:rgba(255,77,109,.1);color:var(--coral)">DEMO CLIMAX</div></div>
+        <div class="feat-card"><div class="feat-num">08</div><div class="feat-title">Board Unanimity Gauge</div><div class="feat-desc">Circular gauge: how many of 7 board members would fund right now. Named, colored, real.</div><div class="feat-badge" style="background:rgba(139,131,232,.1);color:var(--purple)">NEW</div></div>
+        <div class="feat-card"><div class="feat-num">09</div><div class="feat-title">30-Day Directive System</div><div class="feat-desc">Not recommendations. Directives. Named, attributed, time-bound. What you must do by Monday.</div><div class="feat-badge" style="background:rgba(0,229,160,.08);color:var(--mint)">NEW</div></div>
+        <div class="feat-card"><div class="feat-num">10</div><div class="feat-title">Iteration Loop</div><div class="feat-desc">Improve your brief. Re-run the simulation. Watch Marcus change his mind. The retention mechanic.</div><div class="feat-badge" style="background:rgba(255,179,64,.1);color:var(--amber)">RETENTION</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="cta-section">
+    <div class="cta-orb"></div>
+    <div style="position:relative;z-index:1">
+      <div class="eyebrow" style="text-align:center">Ready</div>
+      <h2 class="land-h2" style="text-align:center;font-size:clamp(34px,5.5vw,68px)">Your board is waiting.</h2>
+      <p style="font-size:18px;color:var(--text2);margin-bottom:2.5rem;font-weight:300;text-align:center">FounderVerse is no longer a mirror.<br>FounderVerse is a mentor.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <button class="btn-p" style="font-size:16px;padding:16px 40px" onclick="goTo('submission')">Start Simulation →</button>
+        <button class="btn-g" onclick="runDemo()">⚡ Demo Instantly</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SUBMISSION
+═══════════════════════════════════ -->
+<div id="submission" class="page">
+  <div class="sub-wrap">
+    <div class="sub-hdr">
+      <div class="sub-lbl">Simulation Brief · Phase 3</div>
+      <h1>Brief your executive board.</h1>
+      <p>Seven AI agents are standing by. The Board Secretary, Blind Spot Engine, Simulation Engine, and Marcus Reid are waiting. Make every word count.</p>
+    </div>
+    <div class="stakes-box">⚡ Your board has assembled. They have one directive: find every weakness in your idea before the market does.</div>
+    <div class="demo-bar">
+      <div class="demo-bar-text">🚀 <strong>Demo Mode</strong> runs PocketPhysio — a pre-built HealthTech startup — through the full Phase 3 pipeline instantly.</div>
+      <button class="demo-bar-btn" onclick="runDemo()">⚡ Run Demo</button>
+    </div>
+    <div class="prog-bar-row">
+      <span class="prog-bar-lbl">BRIEF COMPLETENESS</span>
+      <div class="prog-bar-track"><div class="prog-bar-fill" id="formProgress"></div></div>
+      <span class="prog-bar-pct" id="progressPct">0%</span>
+    </div>
+    <div class="sim-quality-row">
+      <span class="sq-lbl">SIMULATION QUALITY</span>
+      <span class="sq-val" id="simQuality" style="color:var(--text3)">WEAK — Add more detail</span>
+    </div>
+    <div class="fg"><label class="fl">Startup Name</label><input type="text" class="fi" id="f-name" placeholder="e.g. PocketPhysio" oninput="updateForm()"></div>
+    <div class="fg"><label class="fl">Problem <span class="fl-hint">Be devastatingly specific</span></label><textarea class="fi" id="f-problem" rows="3" placeholder="What exact pain? Who feels it? How often? What do they do today?" oninput="updateForm()"></textarea></div>
+    <div class="fg"><label class="fl">Solution</label><textarea class="fi" id="f-solution" rows="3" placeholder="How does your startup solve this? Core value proposition?" oninput="updateForm()"></textarea></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Industry</label>
+        <select class="fi" id="f-industry" onchange="updateForm()"><option value="">Select industry</option><option>HealthTech</option><option>FinTech</option><option>EdTech</option><option>SaaS / B2B</option><option>Consumer App</option><option>E-Commerce</option><option>AI / ML Platform</option><option>CleanTech</option><option>PropTech</option><option>Other</option></select>
+      </div>
+      <div class="fg"><label class="fl">Revenue Model</label>
+        <select class="fi" id="f-revenue" onchange="updateForm()"><option value="">Select model</option><option>SaaS Subscription</option><option>Usage-Based</option><option>Marketplace</option><option>Freemium</option><option>Enterprise Licensing</option><option>Transaction Fee</option><option>Other</option></select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Target Customer <span class="fl-hint">Specific beats generic</span></label><input type="text" class="fi" id="f-customer" placeholder="e.g. Adults 25-55 post-surgery who skip physio due to cost/convenience" oninput="updateForm()"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Funding Stage</label>
+        <select class="fi" id="f-stage" onchange="updateForm()"><option value="">Select stage</option><option>Idea / Concept</option><option>MVP Built</option><option>Early Traction</option><option>Seed Stage</option><option>Series A</option></select>
+      </div>
+      <div class="fg"><label class="fl">Main Competitor</label><input type="text" class="fi" id="f-competitor" placeholder="e.g. Hinge Health, or 'None identified'" oninput="updateForm()"></div>
+    </div>
+    <div class="fg"><label class="fl">Unfair Advantage <span class="fl-hint">Why you win</span></label><textarea class="fi" id="f-advantage" rows="2" placeholder="Moat, team expertise, unique insight, timing — be specific" oninput="updateForm();updateChar()"></textarea><div class="char-ct" id="charCount">0 / 500</div></div>
+    <div class="chips-box"><div class="chips-lbl">Your Board</div><div class="chips-row" id="boardChips"></div></div>
+    <button class="sub-btn" id="subBtn" onclick="handleSubmit()">Assemble Board & Run Full Phase 3 Simulation →</button>
+    <div class="sub-note">REAL CLAUDE AI · 8 AGENTS · BLIND SPOT ANALYSIS · SCENARIO ENGINE · INVESTOR VERDICT · ~25s</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     WAR ROOM LOADING
+═══════════════════════════════════ -->
+<div id="loading" class="page">
+  <div class="ld-classified">⬛ CLASSIFIED</div>
+  <div class="ld-simid" id="simId">SIMULATION ID: FV-3031-XXXXXXXX</div>
+  <div class="ld-clearance">CLEARANCE LEVEL: FOUNDER &nbsp;·&nbsp; EYES ONLY &nbsp;·&nbsp; PHASE 3</div>
+  <div class="ld-title">Assembling your<br>executive board</div>
+  <div class="ld-phase" id="ldPhase">Initiating FounderVerse Protocol...</div>
+  <div class="asm-row" id="asmRow"></div>
+  <div class="assembled-moment" id="assembledMoment">
+    <div class="asm-hr"></div>
+    <div class="asm-glow-text">BOARD ASSEMBLED</div>
+    <div class="asm-sub-text">Deliberation begins</div>
+    <div class="asm-hr"></div>
+  </div>
+  <div class="ap-grid" id="apGrid"></div>
+  <div class="ld-feed" id="ldFeed"></div>
+  <div class="ld-prog-wrap">
+    <div class="ld-prog-meta"><span id="ldProgLbl">Running parallel simulations...</span><span id="ldPct">0%</span></div>
+    <div class="ld-prog-track"><div class="ld-prog-bar" id="ldProgBar"></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     BOARD DASHBOARD
+═══════════════════════════════════ -->
+<div id="board" class="page">
+  <div class="wrap">
+    <div class="critical-hero" id="criticalHero" style="display:none">
+      <div class="ch-glow"></div>
+      <div class="ch-badge"><div class="ch-pulse"></div>Critical Board Finding</div>
+      <div class="ch-text" id="chText">Analyzing...</div>
+      <div class="ch-sub" id="chSub">The board has identified this as your most urgent risk.</div>
+    </div>
+    <div class="bd-hdr">
+      <div class="bd-left">
+        <div class="bd-eyebrow">Board Deliberation Complete · Phase 3 AI</div>
+        <h1 id="bdTitle">Executive Board Report</h1>
+        <div class="bd-meta" id="bdMeta">Loading...</div>
+      </div>
+      <div class="score-cards">
+        <div class="sc-card"><div class="sc-num" id="boardAvg" style="color:var(--teal)">—</div><div class="sc-lbl">Board Score</div></div>
+        <div class="sc-card" style="border-color:rgba(255,179,64,.3)"><div class="sc-num" id="bsScorePreview" style="color:var(--amber)">—</div><div class="sc-lbl">Blind Spot™</div></div>
+      </div>
+    </div>
+    <div class="narrative-box" id="narrativeBox">
+      <div class="nb-label">Board Secretary · Executive Summary</div>
+      <div class="nb-text"><span class="dots"><span>.</span><span>.</span><span>.</span></span> Synthesizing board deliberation...</div>
+    </div>
+    <div class="agents-grid" id="agentCards"></div>
+    <div class="tension-box" id="tensionBox" style="display:none">
+      <div class="tension-hdr">
+        <div class="tension-icon">⚡</div>
+        <div class="tension-hdr-text"><h3>Board Tension Engine</h3><p>Strategic conflicts identified by synthesis agent — the fault lines you must resolve</p></div>
+      </div>
+      <div class="tension-grid" id="tensionGrid"></div>
+    </div>
+    <div class="swot-label-row">SWOT Analysis · Board Aggregate</div>
+    <div class="swot-grid" id="swotGrid">
+      <div class="swot-cell"><div class="swot-cell-lbl" style="color:var(--mint)">Strengths</div><div style="font-family:var(--font-mono);font-size:12px;color:var(--text3)"><span class="dots"><span>.</span><span>.</span><span>.</span></span></div></div>
+      <div class="swot-cell"><div class="swot-cell-lbl" style="color:var(--coral)">Weaknesses</div><div style="font-family:var(--font-mono);font-size:12px;color:var(--text3)"><span class="dots"><span>.</span><span>.</span><span>.</span></span></div></div>
+      <div class="swot-cell"><div class="swot-cell-lbl" style="color:var(--teal)">Opportunities</div><div style="font-family:var(--font-mono);font-size:12px;color:var(--text3)"><span class="dots"><span>.</span><span>.</span><span>.</span></span></div></div>
+      <div class="swot-cell"><div class="swot-cell-lbl" style="color:var(--amber)">Threats</div><div style="font-family:var(--font-mono);font-size:12px;color:var(--text3)"><span class="dots"><span>.</span><span>.</span><span>.</span></span></div></div>
+    </div>
+    <div class="pg-nav">
+      <span class="pg-nav-lbl">Board Dashboard</span>
+      <div class="pg-btns">
+        <button class="pg-btn pg-back" onclick="goTo('submission')">← New Brief</button>
+        <button class="pg-btn pg-next" id="toBsBtn" onclick="goTo('blindspot')" disabled>Blind Spot Report →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     BLIND SPOT PAGE
+═══════════════════════════════════ -->
+<div id="blindspot" class="page">
+  <div class="bs-reveal-wrap">
+    <div class="bs-intro">
+      <div class="eyebrow">Founder Blind Spot Score™</div>
+      <div class="section-title">What you said.<br>What the board heard.</div>
+      <p class="bs-pre-text" style="margin-top:.75rem">Four perception gaps. One aggregate score. One uncomfortable truth.</p>
+    </div>
+    <div class="bs-gaps" id="bsGaps"></div>
+    <div class="bs-reveal-card" id="bsRevealCard">
+      <div class="bsr-glow" id="bsrGlow"></div>
+      <div class="bsr-label">Founder Blind Spot Score™</div>
+      <div class="bsr-score-wrap">
+        <div class="bsr-score" id="bsScore" style="color:var(--coral)"><span id="bsScoreNum">0.0</span><span class="bsr-score-denom">/10</span></div>
+      </div>
+      <div class="bsr-benchmark" id="bsBenchmark">Calculating benchmark...</div>
+      <div class="bsr-zone" id="bsZone">—</div>
+      <p class="bsr-context" id="bsContext">Your board has analyzed the gap between your self-description and stakeholder reality.</p>
+    </div>
+    <div class="pg-nav">
+      <span class="pg-nav-lbl">Blind Spot Score™</span>
+      <div class="pg-btns">
+        <button class="pg-btn pg-back" onclick="goTo('board')">← Board Report</button>
+        <button class="pg-btn pg-next" onclick="goTo('simulation')">Future Simulation →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SIMULATION PAGE
+═══════════════════════════════════ -->
+<div id="simulation" class="page">
+  <div class="sim-wrap">
+    <div class="eyebrow">Future Simulation Engine</div>
+    <div class="section-title" style="margin-bottom:2rem">12-Month Projection</div>
+    <div class="single-decision-card" id="singleDecisionCard" style="display:none">
+      <div class="sdc-orb"></div>
+      <div class="sdc-eyebrow">The Decision That Changes Everything</div>
+      <div class="sdc-decision" id="singleDecisionText">Loading...</div>
+    </div>
+    <div class="timeline-card">
+      <div class="tl-hdr-meta" id="tlMeta">Loading simulation...</div>
+      <div class="tl-track">
+        <div class="tl-line"></div>
+        <div class="tl-progress-line" id="tlProgressLine"></div>
+        <div class="tl-nodes" id="tlNodes"></div>
+      </div>
+    </div>
+    <div class="scenarios-lbl">Scenario Models · Weighted Probability</div>
+    <div class="scenarios-row" id="scenariosRow"></div>
+    <div class="pg-nav">
+      <span class="pg-nav-lbl">Future Simulation</span>
+      <div class="pg-btns">
+        <button class="pg-btn pg-back" onclick="goTo('blindspot')">← Blind Spot</button>
+        <button class="pg-btn pg-next" onclick="goTo('verdict')">Investor Verdict →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     VERDICT PAGE — THE CLIMAX
+═══════════════════════════════════ -->
+<div id="verdict" class="page">
+  <div class="verdict-wrap">
+    <div class="v-eyebrow">Board Deliberation Complete · Final Verdict · Phase 3</div>
+
+    <!-- MARCUS CARD -->
+    <div class="marcus-card" id="marcusCard">
+      <div class="marcus-pre-text">Marcus Reid · Venture Partner · FounderVerse Capital</div>
+      <div class="marcus-av-wrap">
+        <div class="marcus-av">MR<div class="marcus-av-ring"></div></div>
+      </div>
+      <div class="marcus-name">Marcus Reid</div>
+      <div class="marcus-title">VENTURE PARTNER · PATTERN-MATCHING SKEPTIC</div>
+      <div class="marcus-suspense" id="marcusSuspense">Marcus Reid has made his decision.</div>
+      <div class="verdict-reveal" id="verdictReveal">
+        <div class="verdict-decision" id="verdictDecisionText">—</div>
+        <div class="verdict-amount" id="verdictAmount">Calculating investment parameters...</div>
+        <div class="verdict-conditions" id="verdictConditions"></div>
+        <div class="verdict-quote" id="verdictQuote"></div>
+        <div class="wtcmm" id="wtcmm"><div class="wtcmm-label">What Would Change My Mind</div><div class="wtcmm-text" id="wtcmmText">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- UNANIMITY GAUGE -->
+    <div class="unanimity-card" id="unanimityCard">
+      <div class="ug-hdr"><div class="ug-title">Board Funding Consensus</div><div class="ug-sub">How many board members would fund at current stage</div></div>
+      <div class="ug-gauge-wrap">
+        <div class="ug-gauge">
+          <svg class="ug-svg" viewBox="0 0 160 160" id="ugSvg">
+            <circle cx="80" cy="80" r="64" fill="none" stroke="var(--bg3)" stroke-width="12"/>
+            <circle cx="80" cy="80" r="64" fill="none" stroke="var(--teal)" stroke-width="12" stroke-dasharray="402" stroke-dashoffset="402" id="ugArc" transform="rotate(-90 80 80)" stroke-linecap="round" style="transition:stroke-dashoffset 1.5s ease"/>
+          </svg>
+          <div class="ug-center-text">
+            <div class="ug-fraction" id="ugFraction">0/7</div>
+            <div class="ug-denom">board</div>
+            <div class="ug-verdict-label" id="ugConfidence">LOW</div>
+          </div>
+        </div>
+      </div>
+      <div class="ug-agents-row">
+        <div class="ug-yes"><div class="ug-agents-label" style="color:var(--mint)">✓ Would Fund</div><div class="ug-agent-list" id="ugYesList"></div></div>
+        <div class="ug-no"><div class="ug-agents-label" style="color:var(--coral)">✗ Would Not Fund</div><div class="ug-agent-list" id="ugNoList"></div></div>
+      </div>
+    </div>
+
+    <!-- 30-DAY DIRECTIVES -->
+    <div class="directives-card">
+      <div class="directives-hdr">
+        <div class="directives-title">Your Board Has Voted.<br>Here Is What Happens Next.</div>
+        <div class="directives-sub">Not recommendations. Directives. Attributed. Time-bound. Non-negotiable.</div>
+      </div>
+      <div id="directivesList"></div>
+    </div>
+
+    <!-- ITERATION LOOP -->
+    <div class="iteration-card">
+      <div class="ic-eyebrow">Iteration Loop · The Retention Mechanic</div>
+      <div class="ic-title">Improve your startup.<br>Watch Marcus change his mind.</div>
+      <div class="ic-sub">FounderVerse is a mentor, not a mirror. Resolve the conditions. Re-run. Watch the board evolve.</div>
+      <div class="ic-flow">
+        <div class="ic-flow-item" style="color:var(--coral)">Current: <strong id="iterCurrentVerdict">—</strong></div>
+        <div class="ic-arrow">→</div>
+        <div class="ic-flow-item" style="color:var(--amber)">Resolve Conditions</div>
+        <div class="ic-arrow">→</div>
+        <div class="ic-flow-item" style="color:var(--mint)">Potential: <strong id="iterNextVerdict">FUND WITH CONDITIONS</strong></div>
+      </div>
+      <button class="ic-btn" onclick="goTo('submission')">Improve Brief & Re-Run Simulation →</button>
+    </div>
+
+    <!-- SHARE -->
+    <div class="share-card">
+      <div class="share-title">Your simulation is complete.</div>
+      <div class="share-sub">Share your board report. Show the world what your AI board of directors found.<br>Or run a new simulation with a refined idea.</div>
+      <div class="share-actions">
+        <button class="share-btn" style="background:linear-gradient(135deg,var(--teal),var(--mint));color:var(--bg)" onclick="generateShareCard()">📊 Generate Share Card</button>
+        <button class="share-btn" style="background:transparent;color:var(--teal);border:1px solid rgba(0,212,200,.3)" onclick="downloadReport()">⬇ Download Report</button>
+        <button class="share-btn" style="background:transparent;color:var(--text2);border:1px solid var(--border)" onclick="goTo('submission')">New Simulation</button>
+      </div>
+    </div>
+
+    <div class="pg-nav">
+      <span class="pg-nav-lbl">Final Verdict · Phase 3</span>
+      <div class="pg-btns">
+        <button class="pg-btn pg-back" onclick="goTo('simulation')">← Simulation</button>
+        <button class="pg-btn pg-next" onclick="goTo('submission')">New Simulation →</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// ╔══════════════════════════════════════════════════════════════╗
+// ║   FOUNDERVERSE AI — PHASE 3 · COMPLETE ENGINE               ║
+// ║   10 AI Features · 8 Agents · Full Accountability System    ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+// ── GLOBAL STATE ──────────────────────────────────────────────
+let API_KEY = '';
+let IS_DEMO = false;
+let CURRENT_ANALYSIS = null;
+let BOARD_RESULTS = null;
+let SYNTHESIS = null;
+let BLIND_SPOT_DATA = null;
+let SIMULATION_DATA = null;
+let VERDICT_DATA = null;
+
+// ── AGENT ROSTER ──────────────────────────────────────────────
+const AGENTS = [
+  { id:'ceo',  name:'Jordan Blake', role:'CEO',      title:'Chief Executive Officer',  archetype:'Visionary Pragmatist',   init:'JB', color:'#00d4c8', bg:'rgba(0,212,200,0.1)',   voice:'"The real question isn\'t whether this works — it\'s whether it scales."',   evaluates:['Product-Market Fit','Vision & Mission','Market Size (TAM)','Scalability Path'] },
+  { id:'cfo',  name:'Sarah Chen',   role:'CFO',      title:'Chief Financial Officer',  archetype:'Numbers Skeptic',        init:'SC', color:'#ff4d6d', bg:'rgba(255,77,109,0.1)',   voice:'"Show me the path to profitability."',                                         evaluates:['Revenue Model','Unit Economics','Burn Rate','Financial Risk'] },
+  { id:'cmo',  name:'Priya Nair',   role:'CMO',      title:'Chief Marketing Officer',  archetype:'Customer Obsessive',     init:'PN', color:'#b57bee', bg:'rgba(181,123,238,0.1)',  voice:'"Tell me why customers should care."',                                         evaluates:['Positioning','Acquisition Strategy','Brand Clarity','Channel Fit'] },
+  { id:'coo',  name:'David Osei',   role:'COO',      title:'Chief Operating Officer',  archetype:'Execution Realist',      init:'DO', color:'#ffb340', bg:'rgba(255,179,64,0.1)',   voice:'"Who executes this on Monday morning?"',                                       evaluates:['Operational Feasibility','Team Needs','Execution Risk','Timeline Realism'] },
+  { id:'cust', name:'Alex',         role:'CUSTOMER', title:'Target Customer Persona',  archetype:'Honest User',            init:'AX', color:'#00e5a0', bg:'rgba(0,229,160,0.1)',    voice:'"Would I actually use this?"',                                                 evaluates:['Purchase Intent','Real-World Appeal','Retention Likelihood','Onboarding'] },
+  { id:'comp', name:'RIVAL-7',      role:'RIVAL',    title:'Competitive Threat Analyst',archetype:'Threat Analyst',        init:'R7', color:'#8899bb', bg:'rgba(136,153,187,0.1)',  voice:'"If I were your competitor, I\'d attack here."',                               evaluates:['Competitive Threats','Market Defensibility','Moat Strength','Entry Barriers'] },
+  { id:'inv',  name:'Marcus Reid',  role:'INVESTOR', title:'Venture Partner',           archetype:'Pattern-Matching Skeptic',init:'MR',color:'#8b83e8', bg:'rgba(139,131,232,0.1)', voice:'"I\'ve seen three versions of this before."',                                  evaluates:['Fundability','Market Opportunity','Team Signal','Investment Decision'] }
+];
+
+const DEMO_BRIEF = {
+  name:'PocketPhysio', industry:'HealthTech', revenue:'SaaS Subscription', stage:'MVP Built',
+  competitor:'Hinge Health, Kaia Health',
+  problem:'After surgery or injury, 68% of patients skip physiotherapy because clinics are expensive ($120/session) and inconvenient. Most do nothing — recovering slower or re-injuring. There is no affordable, personalized rehab guidance available at home.',
+  solution:'PocketPhysio uses your phone camera and AI to analyze movement in real time, prescribe personalized physio exercises, track recovery progress, and give live form corrections — a physiotherapist in your pocket for $15/month.',
+  customer:'Adults aged 25-55 recovering from orthopaedic surgery or sports injuries, prescribed physiotherapy but skipping due to cost or convenience barriers.',
+  advantage:'Proprietary computer vision movement analysis requiring no wearables. Co-founder is a practicing physiotherapist. Three signed hospital pilot partnerships providing warm referrals.'
+};
+
+// ── PROMPT BUILDERS ───────────────────────────────────────────
+function agentPrompt(agent, brief) {
+  const voices = {
+    ceo:  'You are Jordan Blake, CEO — Visionary Pragmatist. Speak with urgency and vision. Think in 3-year arcs. Challenge the market size. Use: "The real question is...", "At scale...", "The timing is..."',
+    cfo:  'You are Sarah Chen, CFO — Numbers Skeptic. Be terse and data-obsessed. Interrogate every number. Use: "Show me the unit economics", "This CAC assumption...", "At current burn rate..."',
+    cmo:  'You are Priya Nair, CMO — Customer Obsessive. Translate features to benefits. Challenge positioning. Use: "Your customer doesn\'t care about...", "The acquisition problem is...", "Messaging must..."',
+    coo:  'You are David Osei, COO — Execution Realist. Think in systems and dependencies. Use: "Who does this Monday?", "The dependency missed is...", "This timeline assumes..."',
+    cust: 'You are Alex, the real target customer. Speak naturally — NOT in business language. React emotionally first. Be honest about what would make you quit using the product.',
+    comp: 'You are RIVAL-7, a cold competitor strategy analyst. Speak as if in a private session. Be clinical. Use: "If I were [competitor], I\'d ship...", "Your moat lasts approximately...", "The attack vector is..."',
+    inv:  'You are Marcus Reid, Venture Partner — Pattern-Matching Skeptic. Use portfolio thinking. Use: "I\'ve seen three versions of this...", "The pattern that failed was...", "My check requires..."'
+  };
+  return `${voices[agent.id]}
+
+Evaluate this startup for the FounderVerse AI Board. Be genuinely critical — not generically supportive. Real boards challenge ideas.
+
+BRIEF:
+Name: ${brief.name}
+Problem: ${brief.problem}
+Solution: ${brief.solution}
+Industry: ${brief.industry}
+Revenue: ${brief.revenue}
+Customer: ${brief.customer}
+Stage: ${brief.stage}
+Competitor: ${brief.competitor||'Not specified'}
+Advantage: ${brief.advantage||'Not specified'}
+
+YOUR ROLE: ${agent.title} — evaluate: ${agent.evaluates.join(', ')}
+
+Respond ONLY with this exact JSON (no markdown, no code fences):
+{"summary":"2-3 sentences in your distinct voice — headline assessment","strengths":["s1","s2","s3"],"concerns":["c1","c2","c3"],"recommendation":"One specific actionable directive in your voice","score":<1-10 integer>,"disposition":"<BULLISH|OPTIMISTIC|CAUTIOUS|SKEPTICAL|DIVIDED>"}
+
+Score honestly. Early-stage ideas typically 4-7. Never be generic.`;
+}
+
+function synthesisPrompt(brief, results) {
+  const sums = results.map(r=>`${r.agent.name} (${r.agent.role}, ${r.result.score}/10): ${r.result.summary}`).join('\n');
+  const concerns = results.map(r=>`${r.agent.role}: ${r.result.concerns.join('; ')}`).join('\n');
+  return `You are the FounderVerse Board Secretary. 7 executives just deliberated on "${brief.name}". Synthesize their findings.
+
+SUMMARIES:\n${sums}\n\nCONCERNS:\n${concerns}
+
+Respond ONLY with this exact JSON:
+{"narrative":"4 sentences. Start: 'The board completed deliberation on ${brief.name}.' Include overall sentiment, sharpest disagreement, board confidence level, single most urgent question.","criticalFinding":"One devastating specific insight about THIS startup — not generic. 1-2 sentences. Make it sting.","criticalFindingSub":"One sentence: why this is the most critical risk right now.","tensions":[{"label":"e.g. Vision vs Viability","sideA":{"agent":"CEO","position":"short position"},"sideB":{"agent":"CFO","position":"short position"},"founderDecision":"Specific decision the founder must make"},{"label":"e.g. Story vs Reality","sideA":{"agent":"CMO","position":"short"},"sideB":{"agent":"CUSTOMER","position":"short"},"founderDecision":"Specific decision"},{"label":"e.g. Ambition vs Execution","sideA":{"agent":"CEO","position":"short"},"sideB":{"agent":"COO","position":"short"},"founderDecision":"Specific decision"}],"swot":{"strengths":["s1","s2","s3"],"weaknesses":["w1","w2","w3"],"opportunities":["o1","o2","o3"],"threats":["t1","t2","t3"]}}`;
+}
+
+function blindSpotPrompt(brief, results) {
+  const custResult  = results.find(r=>r.agent.id==='cust')?.result;
+  const compResult  = results.find(r=>r.agent.id==='comp')?.result;
+  const cfoResult   = results.find(r=>r.agent.id==='cfo')?.result;
+  const ceoResult   = results.find(r=>r.agent.id==='ceo')?.result;
+  return `You are the FounderVerse Blind Spot Engine. Compare what the founder SAID against what board stakeholders HEARD. Find the perception gaps.
+
+FOUNDER SAID:
+Customer: "${brief.customer}"
+Competitor: "${brief.competitor||'None identified'}"
+Revenue/Financial: "${brief.revenue} model"
+Growth/Vision: "${brief.advantage||'Not specified'}"
+Problem: "${brief.problem}"
+Solution: "${brief.solution}"
+
+WHAT STAKEHOLDERS HEARD:
+Customer Agent (Alex) said: "${custResult?.summary||''}" Concerns: ${(custResult?.concerns||[]).join('; ')}
+Competitor Agent (RIVAL-7) said: "${compResult?.summary||''}" Concerns: ${(compResult?.concerns||[]).join('; ')}
+CFO (Sarah) said: "${cfoResult?.summary||''}" Concerns: ${(cfoResult?.concerns||[]).join('; ')}
+CEO (Jordan) said: "${ceoResult?.summary||''}" Concerns: ${(ceoResult?.concerns||[]).join('; ')}
+
+Generate 4 perception gap analyses. Be brutally specific. Name the delusion.
+
+Respond ONLY with this exact JSON:
+{"gaps":[{"name":"Customer Empathy Gap","founderSaid":"Exact quote or close paraphrase of what the founder said about their customer","boardHeard":"What Alex actually understood — one sharp, specific sentence that might sting","whyItMatters":"Why this gap is dangerous for this specific startup","severity":<1-10 float>},{"name":"Competition Awareness Gap","founderSaid":"What founder said about competition","boardHeard":"What RIVAL-7 actually found","whyItMatters":"Why this gap matters","severity":<1-10 float>},{"name":"Financial Assumption Gap","founderSaid":"What founder implied about financials/revenue","boardHeard":"What Sarah Chen stress-tested","whyItMatters":"Why this gap is dangerous","severity":<1-10 float>},{"name":"Growth Strategy Gap","founderSaid":"What founder said about growth/advantage","boardHeard":"What Jordan Blake assessed about scalability","whyItMatters":"Why this gap matters","severity":<1-10 float>}],"overallScore":<0-10 float — average of severities>,"benchmark":"Average founder scores 6.8 on this scale.","zone":"<Exceptional Clarity|Typical Founder|High Blind Spot Risk|Founder Delusion Zone>","zoneContext":"One sentence interpreting what this score means for this specific founder's journey."}`;
+}
+
+function simulationPrompt(brief, results, synthesis) {
+  const avgScore = (results.reduce((s,r)=>s+(r.result.score||5),0)/results.length).toFixed(1);
+  const topConcerns = results.slice(0,3).map(r=>r.result.concerns[0]).join('; ');
+  return `You are the FounderVerse Future Simulation Engine. Based on the board analysis of "${brief.name}", simulate realistic startup futures.
+
+BOARD DATA: Average score ${avgScore}/10. Stage: ${brief.stage}. Industry: ${brief.industry}.
+Top board concerns: ${topConcerns}
+Critical finding: ${synthesis.criticalFinding}
+
+Generate realistic, specific projections — not generic startup advice.
+
+Respond ONLY with this exact JSON:
+{"singleDecision":"The ONE specific decision that determines which scenario this founder ends up in. One sentence. Make it concrete and actionable.","timeline":[{"period":"Month 1","milestone":"Specific critical milestone for THIS startup","probability":67,"risk":"Specific risk","opportunity":"Specific opportunity","boardPulse":"One word: Rising|Steady|Falling","confidencePct":92},{"period":"Month 3","milestone":"Specific milestone","probability":48,"risk":"Specific risk","opportunity":"Specific opportunity","boardPulse":"One word","confidencePct":81},{"period":"Month 6","milestone":"Specific milestone","probability":31,"risk":"Specific risk","opportunity":"Specific opportunity","boardPulse":"One word","confidencePct":67},{"period":"Month 12","milestone":"Specific milestone","probability":19,"risk":"Specific risk","opportunity":"Specific opportunity","boardPulse":"One word","confidencePct":41}],"scenarios":[{"type":"A","title":"The Breakthrough","style":"future_memory","probability":<15-35 integer>,"story":"Write as a future memory: 'It is Month [X]. [What happened — specific to this startup, using agent names Jordan/Sarah/Priya/David/Alex/Marcus]. 3-4 sentences.'","factors":[{"label":"[Specific strength]","weight":35,"positive":true},{"label":"[Another strength]","weight":25,"positive":true},{"label":"[A risk mitigated]","weight":20,"positive":true},{"label":"[Remaining concern]","weight":-20,"positive":false}],"agentTags":["Jordan ↑","Sarah ↑","Marcus ↑"]},{"type":"B","title":"The Slow Fade","style":"post_mortem","probability":<30-50 integer>,"story":"Write as a post-mortem: '[What went wrong — specific to this startup, using agent names]. 3-4 sentences.'","factors":[{"label":"[Key failure driver]","weight":35,"positive":false},{"label":"[Another failure driver]","weight":25,"positive":false},{"label":"[Missed opportunity]","weight":20,"positive":false},{"label":"[One thing that was right]","weight":-20,"positive":true}],"agentTags":["Sarah ↓","Alex ↓","Marcus ↓"]},{"type":"C","title":"The Phoenix Pivot","style":"turning_point","probability":<25-40 integer>,"story":"Write as a turning point: '[Original stalls, something adjacent succeeds — specific to this startup]. 3-4 sentences.'","factors":[{"label":"[Pivot driver]","weight":30,"positive":true},{"label":"[New opportunity discovered]","weight":30,"positive":true},{"label":"[Original model failure]","weight":25,"positive":false},{"label":"[Resilience factor]","weight":15,"positive":true}],"agentTags":["Jordan →","David ↑","Marcus →"]}]}
+
+Ensure scenario probabilities sum to exactly 100.`;
+}
+
+function verdictPrompt(brief, results, synthesis, bsData) {
+  const avgScore = (results.reduce((s,r)=>s+(r.result.score||5),0)/results.length).toFixed(1);
+  const bsScore = bsData?.overallScore||6.5;
+  const bullish = results.filter(r=>['BULLISH','OPTIMISTIC'].includes(r.result.disposition)).length;
+  return `You are Marcus Reid, Venture Partner at FounderVerse Capital. You are pattern-matching and skeptical. You have just reviewed the complete board analysis of "${brief.name}".
+
+BOARD DATA: Average score ${avgScore}/10. ${bullish}/7 agents bullish. Blind Spot Score: ${bsScore}/10.
+Critical finding: ${synthesis.criticalFinding}
+Stage: ${brief.stage}. Industry: ${brief.industry}. Revenue: ${brief.revenue}.
+Top concerns: ${results.map(r=>r.result.concerns[0]).join('; ')}
+
+Make a real investment decision. Be specific. Use your voice as a skeptical VC who has seen this pattern before.
+
+Respond ONLY with this exact JSON:
+{"decision":"<PASS|FUND WITH CONDITIONS|FUND>","investmentAmount":"$[amount]","valuation":"$[amount] pre-money","structure":"<SAFE|Convertible Note|Priced Round>","conditions":["Specific condition 1 tied to board concerns","Specific condition 2","Specific condition 3","Specific condition 4"],"marcusQuote":"2-3 sentences in Marcus's voice referencing specific things from this board analysis. Start with 'I've seen...' or 'The pattern I recognize...'","whatChangesMyMind":"One specific sentence: exactly what evidence would make Marcus upgrade his decision. Make it concrete and achievable.","yesAgents":["agent names from AGENTS array who would fund — CEO/CMO if bullish etc"],"noAgents":["agent names who would not fund"],"nextDecision":"<PASS→FUND WITH CONDITIONS|FUND WITH CONDITIONS→FUND> — what Marcus upgrades to if conditions are met","directives":[{"rank":1,"attributedTo":"[Agent Name, Role]","action":"Specific, concrete action tied to this startup's biggest concern","deadline":"Before Month 1"},{"rank":2,"attributedTo":"[Agent Name, Role]","action":"Second most critical action","deadline":"Before Month 1"},{"rank":3,"attributedTo":"[Agent Name, Role]","action":"Third action","deadline":"Before Month 3"}]}`;
+}
+
+// ── CLAUDE API ─────────────────────────────────────────────────
+async function callClaude(system, user, maxTokens=1000) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,system,messages:[{role:'user',content:user}]})
+  });
+  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error?.message||`API ${res.status}`); }
+  const data = await res.json();
+  const text = data.content[0]?.text||'';
+  const clean = text.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+  try { return JSON.parse(clean); }
+  catch(e) { const m=clean.match(/\{[\s\S]*\}/); if(m) return JSON.parse(m[0]); throw new Error('Bad JSON from agent'); }
+}
+
+// ── DEMO DATA ──────────────────────────────────────────────────
+function demoAgentResult(id) {
+  const d = {
+    ceo:{summary:"PocketPhysio's market timing is exceptional — post-COVID telehealth normalization has made patients far more receptive to remote care. I see a clear path to $50M ARR through the hospital enterprise channel. My concern isn't whether this is a real problem; it's whether this team can win the enterprise sales cycle before Hinge Health acquires the hospital relationships.",strengths:["Validated pain point with a massive underserved population","Hospital partnership pipeline eliminates the cold-start acquisition problem","Computer vision moat is technically defensible if clinical accuracy is proven"],concerns:["Enterprise hospital channel will slow growth — you need to decide B2B vs D2C before Series A","Clinical liability exposure could halt growth if not structured correctly pre-launch","Retention after full recovery is near-zero — the product might be too good at its own job"],recommendation:"Commit to the hospital enterprise model fully. Stop hedging between B2B and D2C — every strategic decision downstream changes based on this choice.",score:8,disposition:"BULLISH"},
+    cfo:{summary:"The unit economics are better than most HealthTech I see at MVP stage — hospital referral CAC could get under $50 if the partnerships hold. The problem is structural: physiotherapy has a natural end date. At $15/month with a 3-month average recovery, your LTV ceiling is $45. That's not a SaaS business — that's a transaction.",strengths:["Hospital referral channel dramatically improves CAC versus consumer health apps","$15/month price point is below the pain threshold — high willingness-to-pay","Gross margin on software is excellent — no hardware dependency or COGS surprise"],concerns:["LTV ceiling of $45 makes scaling math very hard — you need 50K concurrent active patients for $750K MRR","Hospital enterprise sales cycles are 6-9 months — this burns runway before meaningful revenue","Financial model needs a prevention/maintenance tier to break the episodic churn pattern"],recommendation:"Model the LTV ceiling honestly in your pitch deck. Every investor will find it — you need to have already found it and have an answer.",score:6,disposition:"CAUTIOUS"},
+    cmo:{summary:"The positioning sits between 'physiotherapy replacement' and 'physiotherapy companion' and that ambiguity is both a clinical liability and a messaging problem. The camera-based form correction is your hero demo — it should be in every piece of marketing you produce. But 'AI-powered' is table stakes in 2025; the moat is the physiotherapist co-founder.",strengths:["'Physiotherapist in your pocket' is a genuinely memorable positioning hook","Post-surgical patients are maximally motivated at point of diagnosis — acquisition intent peaks exactly when you need it","Hospital referral confers clinical credibility no consumer marketing can buy"],concerns:["Competing with free YouTube physio content requires demonstrable superior outcomes data — not feature lists","The onboarding-to-activation gap will kill retention if not solved before launch — complexity is the enemy","'AI-powered' positioning will be commoditized within 12 months; brand must be built on clinical authority"],recommendation:"Make the physiotherapist co-founder the face of the brand immediately. 'Built by a physiotherapist, available to everyone' is the message.",score:7,disposition:"OPTIMISTIC"},
+    coo:{summary:"The operational challenge here is the clinical accuracy standard required. You are not building a fitness app — you are making rehabilitation recommendations. That requires clinical validation, regulatory clarity, and a liability framework before you approach scale. The MVP existing is encouraging; the missing piece is an operational readiness plan.",strengths:["MVP already built — this team has demonstrated the ability to ship","Hospital partnership model handles a large chunk of customer acquisition without a sales team","Physiotherapist co-founder means clinical protocol development doesn't need to be outsourced"],concerns:["Regulatory classification — wellness app versus medical device — is unresolved and changes everything downstream","Scaling camera AI requires labeled training data at volume — the data acquisition plan is missing","Support load for patients in pain experiencing technical issues will be 5-10x a typical SaaS product"],recommendation:"Spend 30 days with a healthcare regulatory attorney to get a written classification opinion. That single document changes your fundraising story, your liability structure, and your timeline.",score:6,disposition:"CAUTIOUS"},
+    cust:{summary:"Honestly I would download this the day after my knee surgery and use it obsessively for about 3 weeks. Then I'd start skipping days when I felt better. By week 6 it would sit unused. The hardest part of physio isn't knowing what to do — it's wanting to do it when you're not in acute pain anymore.",strengths:["The camera form correction is genuinely cool — I would show every person I know in week one","$15 a month feels like nothing compared to what I was paying per clinic session","Getting it recommended through my hospital makes it feel trustworthy — I wouldn't download a random fitness app for this"],concerns:["When the app tells me to do something that hurts I panic — I need clear guidance on 'normal discomfort' vs 'stop immediately'","I need it to feel like MY physiotherapist knows my specific injury, not a generic program","After I'm recovered I have zero reason to keep paying — the app needs something to keep me around"],recommendation:"Add a weekly recovery milestone moment — tell me I've recovered 20% of my range of motion this week. That moment of progress is what keeps me subscribed.",score:7,disposition:"CAUTIOUS"},
+    comp:{summary:"If I were Hinge Health's product team I would be watching PocketPhysio with moderate concern. The computer vision angle is a real technical differentiator from their sensor-based approach. But Hinge Health has $500M in funding and existing insurer relationships — their distribution moat would take 4-5 years to replicate.",strengths:["Computer vision on standard smartphone is genuinely differentiated — no wearable removes the biggest adoption barrier","Hospital partnership entry creates a defensible distribution channel versus app store discovery","Physiotherapist co-founder gives clinical credibility that a purely technical team cannot manufacture"],concerns:["Hinge Health and Kaia Health have existing insurer reimbursement relationships — this is the real competitive moat","Apple Health platform is positioned to enter AI-guided recovery within 18 months","If camera AI accuracy becomes the standard, any large player can license better computer vision"],recommendation:"Your 6-month window before Hinge Health notices is the time to lock exclusive hospital referral agreements. Switching costs in hospital procurement are high — become their default now.",score:5,disposition:"DIVIDED"},
+    inv:{summary:"I've seen four versions of PocketPhysio in the last two years. The two that failed went D2C. The one that raised a Series B made the hospital the customer and gave the patient experience away free or heavily subsidized. This team has the right insight — hospitals as distribution — but they haven't fully committed to it yet.",strengths:["Hospital referral channel is the right strategic insight and most competitors missed it","Physiotherapist co-founder provides defensibility that pure-tech teams cannot replicate","Digital physical therapy market at $3.8B by 2026 — the market timing is genuinely right"],concerns:["D2C $15/month model and B2B hospital model are two different companies — the team is still hedging","Regulatory classification ambiguity needs legal clarity before institutional investors will engage","Churn-by-design makes standard LTV modeling uncomfortable for most VC investment committees"],recommendation:"My check requires: B2B hospital commitment, regulatory classification letter, and one outcomes data point from the three hospital pilots. Bring those three things and I'll write the term sheet.",score:7,disposition:"CAUTIOUS"}
+  };
+  return d[id]||d.ceo;
+}
+
+function demoSynthesis(brief) {
+  return {
+    narrative:`The board completed deliberation on ${brief.name} with an average score of 6.7/10 — cautiously optimistic overall. The problem is validated, the technical differentiation is real, and the hospital partnership model represents the correct strategic insight. The sharpest disagreement exists between the CEO's bullish market timing thesis and the CFO's structural concern about LTV ceiling from episodic churn. Board confidence is moderate. The single question every board member is waiting for the founder to answer: Is this a B2B hospital enterprise product or a D2C consumer subscription — because the team, fundraising narrative, and go-to-market are entirely different companies depending on the answer.`,
+    criticalFinding:`Physiotherapy has a natural end date. At $15/month with a 3-month average recovery, your LTV ceiling is $45 — and Sarah's financial model shows you need 50,000 concurrent active patients to reach $750K MRR, which requires continuous acquisition at a scale your hospital channel cannot sustain alone.`,
+    criticalFindingSub:`This isn't a growth problem — it's a structural unit economics problem that every institutional investor will find in due diligence. You need to find it first and have an answer ready.`,
+    tensions:[
+      {label:"B2B Enterprise vs D2C Consumer",sideA:{agent:"CEO",position:"Full B2B commitment — make hospitals the customer, subsidize patient experience"},sideB:{agent:"CMO",position:"D2C brand builds faster and creates data moat before hospitals commoditize"},founderDecision:"Choose your primary customer before Series A. Hospital (B2B, slower, defensible) or patient (D2C, faster, commoditizable). You cannot optimize for both in year one."},
+      {label:"Clinical Authority vs Speed",sideA:{agent:"COO",position:"Regulatory classification is urgent — medical device triggers FDA pathway and changes everything"},sideB:{agent:"CEO",position:"Move fast as wellness app now, address regulatory when you have traction and capital"},founderDecision:"Get the regulatory classification letter from a healthcare attorney this month. The cost of waiting exceeds the cost of knowing."},
+      {label:"LTV Ceiling vs Market Scale",sideA:{agent:"CFO",position:"Episodic churn makes unit economics fragile — LTV capped at $45 with current model"},sideB:{agent:"CEO",position:"The recovery market is enormous and continuous — sports injuries, post-surgical, aging population"},founderDecision:"Build a prevention and maintenance tier post-recovery. This turns a 3-month product into a 12-month product — but it requires a different roadmap decision now."}
+    ],
+    swot:{
+      strengths:["Computer vision requires no wearables — dramatically lowers adoption friction versus competitors","Physiotherapist co-founder gives instant clinical credibility and protocol expertise","Hospital partnership pipeline eliminates cold-start customer acquisition"],
+      weaknesses:["Episodic churn by design — patients recover and disengage, capping LTV at ~$45","Regulatory classification ambiguity creates legal and fundraising uncertainty","Competing with free YouTube content requires demonstrably superior outcomes data"],
+      opportunities:["Post-acute care is chronically underserved — $4B market growing at 18% CAGR","Insurance reimbursement pathway transforms unit economics if classified as medical device","Prevention and chronic pain maintenance market extends LTV dramatically beyond acute recovery"],
+      threats:["Hinge Health and Kaia Health have $500M+ combined funding and existing insurer relationships","Apple and Google both have health platforms positioned to enter AI-guided recovery","Hospital procurement cycles are 6-12 months — competitive window for exclusive partnerships is narrow"]
+    }
+  };
+}
+
+function demoBlindSpot(brief) {
+  return {
+    gaps:[
+      {name:"Customer Empathy Gap",founderSaid:"Adults aged 25-55 recovering from orthopaedic surgery or sports injuries",boardHeard:"You know the demographic but not the specific moment of maximum pain, the specific frustration that drives them to pay, or whether they distinguish between types of physio needs.",whyItMatters:"Broad demographic targeting leads to marketing that resonates with nobody specifically. You need a beachhead segment — post-ACL surgery patients, for example — not an age range.",severity:6.8},
+      {name:"Competition Awareness Gap",founderSaid:"Hinge Health, Kaia Health",boardHeard:"You've named the direct competitors but missed the real threat: Apple Health's rehabilitation content, free YouTube physio channels with millions of subscribers, and hospital systems building their own digital rehab tools.",whyItMatters:"Your moat against Hinge Health is computer vision. Your moat against free YouTube content is clinical credibility and personalization. These require completely different messaging strategies.",severity:7.4},
+      {name:"Financial Assumption Gap",founderSaid:"$15/month SaaS subscription",boardHeard:"A revenue model with a structural LTV ceiling of $45, episodic churn by design, and no stated plan for what happens to revenue after the patient recovers.",whyItMatters:"Every institutional investor will calculate this in the first 10 minutes of your pitch. Without a prevention tier or maintenance subscription, your unit economics break at scale.",severity:8.1},
+      {name:"Growth Strategy Gap",founderSaid:"Three signed hospital pilot partnerships providing warm referrals",boardHeard:"Three pilots is a proof of concept, not a growth strategy. The path from 3 hospitals to 300 hospitals requires an enterprise sales motion you haven't described yet.",whyItMatters:"Hospital sales cycles are 6-12 months each. Scaling through hospitals is the right strategy but it requires a dedicated enterprise sales hire and a playbook — neither of which is in the current plan.",severity:7.2}
+    ],
+    overallScore:7.4,
+    benchmark:"The average founder scores 6.8. You scored 7.4.",
+    zone:"High Blind Spot Risk",
+    zoneContext:"You have identified real problems and real solutions, but your perception of market dynamics, competitive threats, and financial structure diverges significantly from how your board — and your future investors — see them."
+  };
+}
+
+function demoSimulation(brief) {
+  return {
+    singleDecision:"Commit to the B2B hospital enterprise model as your primary go-to-market before the end of this month — then build everything else around that decision.",
+    timeline:[
+      {period:"Month 1",milestone:"Launch beta with first hospital's patient referrals — target 50 active users and collect NPS data",probability:67,risk:"Onboarding complexity causes early churn before clinical value is demonstrated",opportunity:"First retention data becomes the most powerful asset in your pitch deck",boardPulse:"Rising",confidencePct:92},
+      {period:"Month 3",milestone:"True CAC from hospital channel becomes measurable — the unit economics story either works or it doesn't",probability:48,risk:"Hospital sales cycle for second and third contracts stalls — pipeline dries up",opportunity:"Outcomes data from Month 1 cohort becomes publishable — co-authored paper unlocks all future hospital doors",boardPulse:"Steady",confidencePct:81},
+      {period:"Month 6",milestone:"Critical fork: enterprise hospital model vs direct-to-consumer pivot — one path forward must be chosen",probability:31,risk:"Without second hospital contract signed, Series A narrative collapses",opportunity:"Insurance reimbursement conversation with one major insurer — could transform unit economics overnight",boardPulse:"Falling",confidencePct:67},
+      {period:"Month 12",milestone:"If hospital model works: 8-12 signed hospitals, 2,000+ active patients, Series A fundable story",probability:19,risk:"If pivot was delayed past Month 6, runway is now critical and options are limited",opportunity:"A single insurer reimbursement deal at this stage changes the entire financial model and valuation trajectory",boardPulse:"Rising",confidencePct:41}
+    ],
+    scenarios:[
+      {type:"A",title:"The Breakthrough",style:"future_memory",probability:24,story:"It is Month 9. The decision to go fully B2B — the one Jordan kept pushing for in Month 2 — turned out to be everything. St. Mary's Hospital became the third signed contract in Month 7, and their outcomes data is now cited in two physio journals. Marcus increased his position in Month 8. Sarah finally trusts the LTV numbers after the hospital introduced a 12-month prevention tier that broke the episodic churn ceiling. The computer vision accuracy story held up under clinical scrutiny. The team is now four people — including the enterprise sales hire David insisted on.",factors:[{label:"Hospital B2B model committed early",weight:35,positive:true},{label:"Outcomes paper unlocked hospital pipeline",weight:25,positive:true},{label:"Prevention tier solved LTV ceiling",weight:22,positive:true},{label:"Regulatory classification delayed 3 months",weight:-18,positive:false}],agentTags:["Jordan ↑","Sarah ↑","Marcus ↑"]},
+      {type:"B",title:"The Slow Fade",style:"post_mortem",probability:42,story:"The hospital enterprise sales cycle proved longer than anyone modeled. By Month 5, only one hospital was active and the referral volume wasn't enough to sustain the burn rate. The D2C consumer channel was tested as a backup — competing with free YouTube content proved harder than expected. Alex churned in week four; the onboarding complexity Sarah had flagged in the first board meeting never got fixed. Marcus passed on the Series A. The problem was real. The execution window closed before the solution was proven.",factors:[{label:"Hospital sales cycle longer than modeled",weight:35,positive:false},{label:"D2C channel couldn't compete with free content",weight:28,positive:false},{label:"Onboarding complexity drove early churn",weight:20,positive:false},{label:"Technical differentiation was real but undermarketed",weight:-15,positive:true}],agentTags:["Sarah ↓","Alex ↓","Marcus ↓"]},
+      {type:"C",title:"The Phoenix Pivot",style:"turning_point",probability:34,story:"The consumer physio app stalled at Month 4 — the LTV ceiling Sarah had warned about was real. But something unexpected surfaced in the data: the movement analysis infrastructure built to power PocketPhysio was more accurate than anything the hospital's existing clinical assessment tools could produce. By Month 6, the team pivoted to licensing the computer vision assessment engine to hospital physiotherapy departments as a clinical tool — B2B SaaS at $2,000/month per department. Jordan called it destiny. David built the new operational model in three weeks. Marcus re-engaged.",factors:[{label:"Computer vision tech superior to clinical tools",weight:32,positive:true},{label:"Hospital relationships enabled pivot discovery",weight:28,positive:true},{label:"Consumer model LTV ceiling forced hand",weight:24,positive:false},{label:"Physiotherapist co-founder gave instant B2B credibility",weight:16,positive:true}],agentTags:["Jordan →","David ↑","Marcus →"]}
+    ]
+  };
+}
+
+function demoVerdict(brief) {
+  return {
+    decision:"FUND WITH CONDITIONS",
+    investmentAmount:"$450,000",valuation:"$2.8M",structure:"SAFE Note",
+    conditions:["Sign at least one additional hospital partnership beyond the current three pilots — demonstrating the sales motion is repeatable","Obtain a written regulatory classification opinion from a licensed healthcare attorney — wellness app vs. medical device","Rebuild the financial model with realistic CAC assumptions ($150-200 per patient) and show the path to $1M ARR with the B2B hospital model","Commit to a single go-to-market strategy — B2B hospital enterprise or D2C consumer — and show the 12-month roadmap for the chosen path"],
+    marcusQuote:"I've seen four versions of PocketPhysio in the last two years. The two that failed went direct-to-consumer and ran into the LTV ceiling Sarah identified in your board review. The one that raised a Series B made the hospital the primary customer before Month 6. You have the right insight — hospital distribution — but you're still hedging. The term sheet I'm offering requires commitment, not optionality.",
+    whatChangesMyMind:"Show me one signed enterprise hospital contract above $50K ARR, the regulatory classification letter, and three months of retention data showing engagement beyond the initial recovery period — and I'll move to an unconditional FUND.",
+    yesAgents:["Jordan Blake","Priya Nair"],
+    noAgents:["Sarah Chen","David Osei","Alex","RIVAL-7","Marcus Reid"],
+    nextDecision:"FUND WITH CONDITIONS→FUND",
+    directives:[
+      {rank:1,attributedTo:"Sarah Chen, CFO",action:"Rebuild your financial model using CAC of $150-200 per patient and model the LTV ceiling honestly. Show the path to $1M ARR under the B2B hospital model specifically.",deadline:"Before Month 1"},
+      {rank:2,attributedTo:"David Osei, COO",action:"Get a written regulatory classification opinion from a licensed healthcare attorney. Wellness app or medical device — this single decision changes your timeline, fundraising narrative, and liability structure.",deadline:"Before Month 1"},
+      {rank:3,attributedTo:"Marcus Reid, Investor",action:"Sign a second hospital partnership beyond your current three pilots. This is the evidence that your sales motion is repeatable and not dependent on founding-team relationships.",deadline:"Before Month 3"}
+    ]
+  };
+}
+
+// ── WAR ROOM BUILDER ──────────────────────────────────────────
+function buildWarRoom() {
+  const row = document.getElementById('asmRow');
+  const apg = document.getElementById('apGrid');
+  const feed = document.getElementById('ldFeed');
+  if(row) { row.innerHTML=''; AGENTS.forEach((a,i)=>{ const d=document.createElement('div'); d.className='asm-agent'; d.id=`asm-${a.id}`; d.style.animationDelay=`${0.3+i*0.38}s`; d.innerHTML=`<div class="asm-av" style="background:${a.bg};color:${a.color};border-color:${a.color}22">${a.init}<div class="asm-av-ring" style="border-color:${a.color}55"></div></div><div class="asm-role" style="color:${a.color}88">${a.role}</div><div class="asm-voice" id="voice-${a.id}" style="color:${a.color}bb">${a.voice}</div>`; row.appendChild(d); }); }
+  if(apg) { apg.innerHTML=''; AGENTS.forEach(a=>{ const d=document.createElement('div'); d.className='ap-item'; d.innerHTML=`<div class="ap-label" style="color:${a.color}">${a.role}</div><div class="ap-track"><div class="ap-fill" id="apf-${a.id}" style="background:${a.color}"></div></div><div class="ap-stat" id="aps-${a.id}">Waiting</div>`; apg.appendChild(d); }); }
+  if(feed) feed.innerHTML='';
+}
+
+function showVoices() { AGENTS.forEach((a,i)=>setTimeout(()=>{ const v=document.getElementById(`voice-${a.id}`); if(v){v.style.opacity='1';} },400+i*350)); }
+
+function setAgentProgress(id,pct,status) {
+  const f=document.getElementById(`apf-${id}`); const s=document.getElementById(`aps-${id}`);
+  if(f) f.style.width=pct+'%'; if(s) s.textContent=status;
+}
+
+function setGlobalProgress(pct,label) {
+  const b=document.getElementById('ldProgBar'); const p=document.getElementById('ldPct'); const l=document.getElementById('ldProgLbl');
+  if(b) b.style.width=pct+'%'; if(p) p.textContent=pct+'%'; if(l&&label) l.textContent=label;
+}
+
+function addFeed(text,color='#00d4c8') {
+  const f=document.getElementById('ldFeed'); if(!f) return;
+  const d=document.createElement('div'); d.className='feed-line';
+  d.innerHTML=`<div class="feed-pip" style="background:${color}"></div><span>${text}</span>`;
+  f.appendChild(d); f.scrollTop=f.scrollHeight;
+}
+
+function setPhase(text) { const el=document.getElementById('ldPhase'); if(el) el.textContent=text; }
+
+// ── MAIN SIMULATION ORCHESTRATOR ─────────────────────────────
+async function runSimulation(brief) {
+  goTo('loading'); buildWarRoom();
+  document.getElementById('simId').textContent=`SIMULATION ID: FV-${Date.now().toString(36).toUpperCase().slice(-8)}`;
+
+  const phases=['Initiating FounderVerse Protocol...','Assembling executive board...','Agents initializing...','Running parallel analysis...','Board deliberating...','Synthesis engine running...','Blind spot analysis...','Simulation engine...','Investor verdict...','Compiling final report...'];
+  let pi=0; const pt=setInterval(()=>{ if(pi<phases.length-1) setPhase(phases[++pi]); },2200);
+
+  setGlobalProgress(5,'Board assembling...');
+  await sleep(3000); showVoices(); await sleep(2800);
+
+  // Board assembled moment
+  const am=document.getElementById('assembledMoment');
+  if(am){ am.style.display='flex'; AGENTS.forEach(a=>{ const av=document.querySelector(`#asm-${a.id} .asm-av`); if(av) av.style.boxShadow=`0 0 22px ${a.color}66`; }); }
+  await sleep(2200); if(am) am.style.display='none';
+
+  setGlobalProgress(15,'Running 7 parallel agents...');
+  addFeed('All agents initialized — firing parallel analysis...','#00d4c8');
+  AGENTS.forEach(a=>setAgentProgress(a.id,8,'Analyzing...'));
+
+  // ── AGENT EXECUTION ──
+  let boardResults;
+  if(IS_DEMO) {
+    const demoDelay = AGENTS.map((a,i)=>new Promise(res=>{
+      const delay=1200+Math.random()*2800;
+      setTimeout(()=>{ setAgentProgress(a.id,55,'Processing...'); addFeed(`${a.name} (${a.role}) — analysis running...`,a.color);
+        setTimeout(()=>{ setAgentProgress(a.id,100,'Complete ✓'); addFeed(`${a.name} — verdict ready`,a.color); res({agent:a,result:demoAgentResult(a.id),success:true}); },delay*0.55); },delay*0.45);
+    }));
+    boardResults=await Promise.all(demoDelay);
+  } else {
+    const timers=AGENTS.map(a=>setInterval(()=>{ const f=document.getElementById(`apf-${a.id}`); const cur=parseFloat(f?.style.width||'8'); if(cur<80) setAgentProgress(a.id,cur+Math.random()*7,'Analyzing...'); },700));
+    AGENTS.forEach((a,i)=>setTimeout(()=>addFeed(`${a.name} (${a.role}) — agent initialized`,a.color),i*180));
+    try {
+      boardResults=await Promise.all(AGENTS.map(a=>
+        callClaude(agentPrompt(a,brief),`Analyze as ${a.name}, ${a.role}.`,800)
+        .then(r=>({agent:a,result:r,success:true}))
+        .catch(e=>({agent:a,result:{summary:`Analysis error for ${a.name}. Using fallback.`,strengths:['Analysis pending'],concerns:['Error occurred'],recommendation:'Review with available data.',score:5,disposition:'DIVIDED'},success:false,error:e.message}))
+      ));
+      timers.forEach(t=>clearInterval(t));
+      boardResults.forEach(r=>{ setAgentProgress(r.agent.id,100,r.success?'Complete ✓':'Error ⚠'); addFeed(`${r.agent.name} — ${r.agent.role} verdict ready`,r.agent.color); });
+    } catch(e) { timers.forEach(t=>clearInterval(t)); clearInterval(pt); showToast('Board analysis failed: '+e.message); goTo('submission'); return; }
+  }
+
+  setGlobalProgress(65,'Board Secretary synthesizing...');
+  addFeed('Tension Engine identifying contradictions...','#00d4c8');
+
+  // ── SYNTHESIS ──
+  let synthesis;
+  try { synthesis=IS_DEMO ? (await sleep(1200),demoSynthesis(brief)) : await callClaude(synthesisPrompt(brief,boardResults),'Synthesize the board deliberation.',1200); }
+  catch(e) { synthesis=demoSynthesis(brief); addFeed('Synthesis fallback mode active...','#ffb340'); }
+
+  setGlobalProgress(75,'Blind Spot Engine analyzing gaps...');
+  addFeed('Comparing founder perception vs board reality...','#ff4d6d');
+
+  // ── BLIND SPOT ──
+  let bsData;
+  try { bsData=IS_DEMO ? (await sleep(1000),demoBlindSpot(brief)) : await callClaude(blindSpotPrompt(brief,boardResults),'Generate the Founder Blind Spot Score analysis.',1000); }
+  catch(e) { bsData=demoBlindSpot(brief); }
+
+  setGlobalProgress(85,'Simulation Engine running scenarios...');
+  addFeed('Projecting Month 1/3/6/12 trajectories...','#00e5a0');
+
+  // ── SIMULATION ──
+  let simData;
+  try { simData=IS_DEMO ? (await sleep(1200),demoSimulation(brief)) : await callClaude(simulationPrompt(brief,boardResults,synthesis),'Generate the 12-month simulation and scenarios.',1400); }
+  catch(e) { simData=demoSimulation(brief); }
+
+  setGlobalProgress(93,'Marcus Reid deliberating...');
+  addFeed('Investor verdict engine computing term sheet...','#8b83e8');
+
+  // ── VERDICT ──
+  let verdictData;
+  try { verdictData=IS_DEMO ? (await sleep(1000),demoVerdict(brief)) : await callClaude(verdictPrompt(brief,boardResults,synthesis,bsData),'Generate Marcus Reid\'s investment verdict.',1100); }
+  catch(e) { verdictData=demoVerdict(brief); }
+
+  setGlobalProgress(100,'Report complete'); clearInterval(pt);
+  addFeed('All engines complete. Preparing dashboard...','#00e5a0');
+
+  CURRENT_ANALYSIS={brief,boardResults,synthesis,bsData,simData,verdictData};
+  BOARD_RESULTS=boardResults; SYNTHESIS=synthesis; BLIND_SPOT_DATA=bsData; SIMULATION_DATA=simData; VERDICT_DATA=verdictData;
+
+  await sleep(700);
+  populateBoard(brief,boardResults,synthesis,bsData);
+  populateBlindSpot(bsData);
+  populateSimulation(simData,brief);
+  populateVerdict(verdictData,boardResults);
+  goTo('board');
+}
+
+// ── POPULATE BOARD ─────────────────────────────────────────────
+function populateBoard(brief,results,syn,bs) {
+  document.getElementById('bdTitle').textContent=`${brief.name} · Board Report`;
+  document.getElementById('bdMeta').textContent=`${brief.industry} · ${brief.revenue} · ${brief.stage} · ${IS_DEMO?'Demo Mode':'Live AI'}`;
+
+  // Critical finding
+  const ch=document.getElementById('criticalHero');
+  if(ch&&syn.criticalFinding){ document.getElementById('chText').textContent=syn.criticalFinding; document.getElementById('chSub').textContent=syn.criticalFindingSub||''; ch.style.display='block'; }
+
+  // Scores
+  const avg=(results.reduce((s,r)=>s+(r.result.score||5),0)/results.length);
+  const avgColor=avg>=7?'#00e5a0':avg>=5?'#ffb340':'#ff4d6d';
+  animCounter('boardAvg',avg,avg.toFixed(1),avgColor);
+  if(bs) animCounter('bsScorePreview',bs.overallScore,bs.overallScore.toFixed(1),bs.overallScore>=7?'#ff4d6d':bs.overallScore>=4?'#ffb340':'#00e5a0');
+  document.getElementById('toBsBtn').disabled=false;
+
+  // Narrative
+  const nb=document.getElementById('narrativeBox');
+  if(nb&&syn.narrative) nb.innerHTML=`<div class="nb-label">Board Secretary · Executive Summary</div><div class="nb-text">${syn.narrative}</div>`;
+
+  // Agent cards
+  const grid=document.getElementById('agentCards'); grid.innerHTML='';
+  results.forEach((r,i)=>{
+    const a=r.agent; const res=r.result;
+    const sc=res.score>=7?'#00e5a0':res.score>=5?'#ffb340':'#ff4d6d';
+    const card=document.createElement('div'); card.className='afc'; card.style.borderTopColor=a.color;
+    const strHtml=(res.strengths||[]).map(s=>`<div class="afc-sec-item"><div class="afc-sec-dot" style="background:var(--mint)"></div>${s}</div>`).join('');
+    const conHtml=(res.concerns||[]).map(c=>`<div class="afc-sec-item"><div class="afc-sec-dot" style="background:var(--coral)"></div>${c}</div>`).join('');
+    card.innerHTML=`<div class="afc-hdr"><div class="afc-av" style="background:${a.bg};color:${a.color}">${a.init}</div><div class="afc-info"><h3>${a.name}</h3><div class="afc-role">${a.role} · <span style="color:${a.color};font-size:9px">${res.disposition||'—'}</span></div></div><div class="afc-score-badge" id="afc-sc-${a.id}" style="background:${a.bg};color:${sc}">—</div></div><div class="afc-bar-track"><div class="afc-bar-fill" id="afc-bar-${a.id}" style="background:${sc}"></div></div><div class="afc-verdict">${res.summary}</div>${strHtml?`<div style="font-family:var(--font-mono);font-size:9px;color:var(--mint);letter-spacing:.08em;margin-bottom:.35rem;text-transform:uppercase">Strengths</div><div class="afc-secs">${strHtml}</div>`:''}${conHtml?`<div style="font-family:var(--font-mono);font-size:9px;color:var(--coral);letter-spacing:.08em;margin:.55rem 0 .35rem;text-transform:uppercase">Concerns</div><div class="afc-secs">${conHtml}</div>`:''}${res.recommendation?`<div class="afc-rec"><div class="afc-rec-label">Recommendation</div>${res.recommendation}</div>`:''}`;
+    grid.appendChild(card);
+    setTimeout(()=>{ card.classList.add('vis'); setTimeout(()=>{ animScoreBar(`afc-bar-${a.id}`,res.score); animScoreBadge(`afc-sc-${a.id}`,res.score,sc); },200); },80+i*130);
+  });
+
+  // Tensions
+  if(syn.tensions?.length){ const tb=document.getElementById('tensionBox'); const tg=document.getElementById('tensionGrid'); tg.innerHTML=''; syn.tensions.forEach(t=>{ const el=document.createElement('div'); el.className='ti'; el.innerHTML=`<span class="ti-lbl">${t.label}</span><div class="ti-sides"><div class="ti-side"><strong>${t.sideA.agent}</strong>${t.sideA.position}</div><div class="ti-side"><strong>${t.sideB.agent}</strong>${t.sideB.position}</div></div><div class="ti-dec"><strong>Founder Decision</strong>${t.founderDecision}</div>`; tg.appendChild(el); }); tb.style.display='block'; }
+
+  // SWOT
+  if(syn.swot){ const g=document.getElementById('swotGrid'); const mkLi=(arr,c)=>arr.map(i=>`<li><div class="swot-dot" style="background:${c}"></div>${i}</li>`).join(''); g.innerHTML=`<div class="swot-cell"><div class="swot-cell-lbl" style="color:var(--mint)">Strengths</div><ul class="swot-list">${mkLi(syn.swot.strengths,'var(--mint)')}</ul></div><div class="swot-cell"><div class="swot-cell-lbl" style="color:var(--coral)">Weaknesses</div><ul class="swot-list">${mkLi(syn.swot.weaknesses,'var(--coral)')}</ul></div><div class="swot-cell"><div class="swot-cell-lbl" style="color:var(--teal)">Opportunities</div><ul class="swot-list">${mkLi(syn.swot.opportunities,'var(--teal)')}</ul></div><div class="swot-cell"><div class="swot-cell-lbl" style="color:var(--amber)">Threats</div><ul class="swot-list">${mkLi(syn.swot.threats,'var(--amber)')}</ul></div>`; }
+}
+
+// ── POPULATE BLIND SPOT ───────────────────────────────────────
+function populateBlindSpot(bs) {
+  if(!bs) return;
+  const container=document.getElementById('bsGaps'); container.innerHTML='';
+  bs.gaps.forEach((gap,i)=>{
+    const sevColor=gap.severity>=7?'#ff4d6d':gap.severity>=5?'#ffb340':'#00e5a0';
+    const card=document.createElement('div'); card.className='bs-gap-card';
+    card.innerHTML=`<div class="bsgc-hdr"><div class="bsgc-name">${gap.name}</div><div class="bsgc-sev-wrap"><div class="bsgc-sev-label">SEVERITY</div><div><div class="bsgc-sev-num" style="color:${sevColor}">${gap.severity.toFixed(1)}</div><div class="bsgc-sev-track"><div class="bsgc-sev-fill" id="bsf-${i}" style="background:${sevColor}"></div></div></div></div></div><div class="bsgc-body"><div class="bsgc-side"><div class="bsgc-side-lbl" style="color:var(--teal)">Founder Said</div><div class="bsgc-side-text">"${gap.founderSaid}"</div></div><div class="bsgc-side"><div class="bsgc-side-lbl" style="color:var(--coral)">Board Heard</div><div class="bsgc-side-text">"${gap.boardHeard}"</div></div></div><div class="bsgc-why"><span class="bsgc-why-label">Why It Matters</span>${gap.whyItMatters}</div>`;
+    container.appendChild(card);
+    setTimeout(()=>{ card.classList.add('vis'); setTimeout(()=>{ const f=document.getElementById(`bsf-${i}`); if(f) f.style.width=(gap.severity*10)+'%'; },200); },100+i*220);
+  });
+
+  // Reveal card
+  const rc=document.getElementById('bsRevealCard');
+  const glow=document.getElementById('bsrGlow');
+  const scoreColor=bs.overallScore>=7?'#ff4d6d':bs.overallScore>=4?'#ffb340':'#00e5a0';
+  const glowColor=bs.overallScore>=7?'rgba(255,77,109,0.1)':bs.overallScore>=4?'rgba(255,179,64,0.08)':'rgba(0,229,160,0.06)';
+  if(glow) glow.style.background=`radial-gradient(circle,${glowColor},transparent 70%)`;
+
+  const zoneColors={'Exceptional Clarity':'#00e5a0','Typical Founder':'#ffb340','High Blind Spot Risk':'#ff4d6d','Founder Delusion Zone':'#ff4d6d'};
+  const zc=zoneColors[bs.zone]||'#ffb340';
+
+  setTimeout(()=>{
+    rc.classList.add('vis');
+    setTimeout(()=>{
+      animCounterFloat('bsScoreNum',0,bs.overallScore,1200);
+      document.getElementById('bsScore').style.color=scoreColor;
+      document.getElementById('bsBenchmark').textContent=bs.benchmark;
+      const zoneEl=document.getElementById('bsZone');
+      zoneEl.textContent=bs.zone; zoneEl.style.background=zc+'22'; zoneEl.style.color=zc; zoneEl.style.border=`1px solid ${zc}44`;
+      document.getElementById('bsContext').textContent=bs.zoneContext;
+    },300);
+  },100+bs.gaps.length*220+400);
+}
+
+// ── POPULATE SIMULATION ───────────────────────────────────────
+function populateSimulation(sim,brief) {
+  if(!sim) return;
+  // Single decision
+  const sdc=document.getElementById('singleDecisionCard'); const sdt=document.getElementById('singleDecisionText');
+  if(sdc&&sim.singleDecision){ sdt.textContent=sim.singleDecision; sdc.style.display='block'; }
+
+  // Timeline meta
+  document.getElementById('tlMeta').textContent=`${brief.name} · Confidence decay applied · Board-weighted projections`;
+
+  // Nodes
+  const nodesEl=document.getElementById('tlNodes'); nodesEl.innerHTML='';
+  const statuses=['done','done','now','future'];
+  sim.timeline.forEach((node,i)=>{
+    const st=statuses[i]; const pulseColor=node.boardPulse==='Rising'?'var(--mint)':node.boardPulse==='Falling'?'var(--coral)':'var(--text3)';
+    const d=document.createElement('div'); d.className='tl-node';
+    d.innerHTML=`<div class="tl-circle ${st}">${node.period.split(' ')[1]}</div><div class="tl-info"><div class="tl-period">${node.period.toUpperCase()}</div><div class="tl-milestone">${node.milestone}</div><div class="tl-prob" style="color:var(--teal)">${node.probability}% on-track</div><div class="tl-conf-wrap"><div class="tl-conf-pct">${node.confidencePct}% conf.</div><div class="tl-conf-bar"><div class="tl-conf-fill" style="width:${node.confidencePct}%"></div></div><div style="font-family:var(--font-mono);font-size:9px;color:${pulseColor};margin-top:3px">Board: ${node.boardPulse}</div></div></div>`;
+    nodesEl.appendChild(d);
+  });
+  setTimeout(()=>{ const pl=document.getElementById('tlProgressLine'); if(pl) pl.style.width='55%'; },400);
+
+  // Scenarios
+  const scRow=document.getElementById('scenariosRow'); scRow.innerHTML='';
+  const scClasses={A:'sc-a',B:'sc-b',C:'sc-c'};
+  const scColors={A:'var(--mint)',B:'var(--coral)',C:'var(--amber)'};
+  sim.scenarios.forEach(sc=>{
+    const col=scColors[sc.type]; const cls=scClasses[sc.type];
+    const factorsHtml=(sc.factors||[]).map(f=>`<div class="sc-factor"><span>${f.label}</span><div style="display:flex;align-items:center;gap:6px"><span style="font-family:var(--font-mono);font-size:10px;color:${f.positive?'var(--mint)':'var(--coral)'}">${f.positive?'+':''}${f.positive?f.weight:-f.weight}%</span><div class="sc-factor-bar-track"><div class="sc-factor-bar" style="width:${Math.abs(f.weight)*2}%;background:${f.positive?'var(--mint)':'var(--coral)'}"></div></div></div></div>`).join('');
+    const tagsHtml=(sc.agentTags||[]).map(t=>`<span class="sc-agent-tag" style="background:${col}11;color:${col}">${t}</span>`).join('');
+    const card=document.createElement('div'); card.className=`sc-card ${cls}`;
+    card.innerHTML=`<div class="sc-hdr"><div class="sc-type-wrap"><div class="sc-type" style="color:${col}">Scenario ${sc.type}</div><div class="sc-title-text" style="color:${col}">${sc.title}</div></div><div class="sc-prob-wrap"><div class="sc-prob-num" style="color:${col}">${sc.probability}%</div><div class="sc-prob-lbl">probability</div></div></div><div class="sc-story">${sc.story}</div>${factorsHtml?`<div class="sc-factors-label" style="color:${col}">Probability Weighted By</div><div class="sc-factors">${factorsHtml}</div>`:''}<div class="sc-agents-row">${tagsHtml}</div>`;
+    scRow.appendChild(card);
+  });
+}
+
+// ── POPULATE VERDICT ──────────────────────────────────────────
+function populateVerdict(vd,boardResults) {
+  if(!vd) return;
+
+  // Marcus reveal sequence
+  const decisionColors={'FUND':'#00e5a0','FUND WITH CONDITIONS':'#ffb340','PASS':'#ff4d6d'};
+  const dc=decisionColors[vd.decision]||'#ffb340';
+  setTimeout(()=>{
+    const susp=document.getElementById('marcusSuspense');
+    if(susp) susp.style.opacity='0.4';
+    setTimeout(()=>{
+      const reveal=document.getElementById('verdictReveal'); if(!reveal) return;
+      reveal.style.display='block';
+      const dt=document.getElementById('verdictDecisionText');
+      if(dt){ dt.textContent=vd.decision; dt.style.color=dc; dt.style.textShadow=`0 0 40px ${dc}66`; }
+      document.getElementById('verdictAmount').textContent=`${vd.investmentAmount||'—'} · ${vd.valuation||'—'} · ${vd.structure||'SAFE'}`;
+      const cond=document.getElementById('verdictConditions');
+      if(cond){ const lbl=`<div class="vc-lbl">Conditions Before Closing</div>`; const items=(vd.conditions||[]).map((c,i)=>`<div class="vc-item"><div class="vc-num">${i+1}</div>${c}</div>`).join(''); cond.innerHTML=lbl+items; }
+      document.getElementById('verdictQuote').textContent=vd.marcusQuote||'';
+      document.getElementById('wtcmmText').textContent=vd.whatChangesMyMind||'';
+    },3000);
+  },800);
+
+  // Unanimity gauge
+  setTimeout(()=>{
+    const yes=vd.yesAgents||[]; const no=vd.noAgents||[];
+    const total=7; const yesCt=Math.min(yes.length,total);
+    const arc=document.getElementById('ugArc');
+    const circumference=2*Math.PI*64;
+    if(arc){ setTimeout(()=>{ arc.style.strokeDashoffset=circumference-(circumference*(yesCt/total)); const gaugeColor=yesCt>=5?'var(--mint)':yesCt>=3?'var(--amber)':'var(--coral)'; arc.style.stroke=gaugeColor; },400); }
+    document.getElementById('ugFraction').textContent=`${yesCt}/${total}`;
+    const confLabel=yesCt>=5?'HIGH CONSENSUS':yesCt>=3?'MODERATE':'LOW CONSENSUS';
+    document.getElementById('ugConfidence').textContent=confLabel;
+    const yList=document.getElementById('ugYesList'); const nList=document.getElementById('ugNoList');
+    if(yList) yList.innerHTML=yes.map(name=>{ const a=AGENTS.find(ag=>ag.name===name||ag.role===name); return `<div class="ug-agent-item"><div class="ug-av" style="background:${a?.bg||'rgba(0,229,160,0.1)'};color:${a?.color||'var(--mint)'}">${a?.init||'?'}</div>${name}</div>`; }).join('');
+    if(nList) nList.innerHTML=no.map(name=>{ const a=AGENTS.find(ag=>ag.name===name||ag.role===name); return `<div class="ug-agent-item"><div class="ug-av" style="background:${a?.bg||'rgba(255,77,109,0.1)'};color:${a?.color||'var(--coral)'}">${a?.init||'?'}</div>${name}</div>`; }).join('');
+  },1000);
+
+  // Directives
+  const dList=document.getElementById('directivesList');
+  if(dList&&vd.directives){ const colors=['#00d4c8','#00e5a0','#ffb340'];
+    dList.innerHTML=vd.directives.map((d,i)=>`<div class="directive-item"><div class="di-num" style="background:${colors[i]}22;color:${colors[i]};border:1px solid ${colors[i]}33">${d.rank||i+1}</div><div class="di-content"><div class="di-by" style="color:${colors[i]}">Per ${d.attributedTo}</div><div class="di-action">${d.action}</div><div class="di-deadline" style="background:rgba(0,212,200,.06);border:1px solid rgba(0,212,200,.15);color:var(--teal)">⏱ ${d.deadline}</div></div></div>`).join(''); }
+
+  // Iteration loop
+  document.getElementById('iterCurrentVerdict').textContent=vd.decision||'—';
+  document.getElementById('iterCurrentVerdict').style.color=dc;
+  const next=vd.nextDecision?.split('→')[1]||'FUND WITH CONDITIONS';
+  document.getElementById('iterNextVerdict').textContent=next;
+}
+
+// ── ANIMATION UTILITIES ────────────────────────────────────────
+function animCounter(elId,target,displayVal,color) {
+  const el=document.getElementById(elId); if(!el) return;
+  el.style.color=color;
+  if(isNaN(target)){el.textContent=displayVal;return;}
+  let cur=0; const step=30; const inc=target/(1200/step);
+  const t=setInterval(()=>{ cur=Math.min(cur+inc,target); el.textContent=cur.toFixed(1); if(cur>=target){el.textContent=displayVal;clearInterval(t);} },step);
+}
+
+function animCounterFloat(elId,from,to,duration) {
+  const el=document.getElementById(elId); if(!el) return;
+  let cur=from; const step=30; const inc=(to-from)/(duration/step);
+  const t=setInterval(()=>{ cur=Math.min(cur+inc,to); el.textContent=cur.toFixed(1); if(cur>=to){el.textContent=to.toFixed(1);clearInterval(t);} },step);
+}
+
+function animScoreBar(elId,score) { const el=document.getElementById(elId); if(el) setTimeout(()=>el.style.width=(score*10)+'%',50); }
+
+function animScoreBadge(elId,score,color) {
+  const el=document.getElementById(elId); if(!el) return;
+  let cur=0; const t=setInterval(()=>{ cur++; el.textContent=cur+'/10'; if(cur>=score) clearInterval(t); },75);
+}
+
+// ── SHARE CARD GENERATOR ──────────────────────────────────────
+function generateShareCard() {
+  if(!CURRENT_ANALYSIS){ showToast('Run a simulation first.'); return; }
+  const {brief,bsData,verdictData} = CURRENT_ANALYSIS;
+  const canvas=document.getElementById('simCardCanvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=1200; canvas.height=630;
+
+  // Background
+  ctx.fillStyle='#050816'; ctx.fillRect(0,0,1200,630);
+  const grad=ctx.createRadialGradient(600,315,0,600,315,400);
+  grad.addColorStop(0,'rgba(0,212,200,0.08)'); grad.addColorStop(1,'transparent');
+  ctx.fillStyle=grad; ctx.fillRect(0,0,1200,630);
+
+  // Grid lines
+  ctx.strokeStyle='rgba(0,212,200,0.04)'; ctx.lineWidth=1;
+  for(let x=0;x<1200;x+=64){ ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,630);ctx.stroke(); }
+  for(let y=0;y<630;y+=64){ ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(1200,y);ctx.stroke(); }
+
+  // Border
+  ctx.strokeStyle='rgba(0,212,200,0.2)'; ctx.lineWidth=2; ctx.strokeRect(20,20,1160,590);
+
+  // Brand
+  ctx.fillStyle='#00d4c8'; ctx.font='bold 28px sans-serif'; ctx.fillText('FOUNDERVERSE AI',60,80);
+  ctx.fillStyle='rgba(232,240,255,0.35)'; ctx.font='14px monospace'; ctx.fillText('SIMULATION REPORT · PHASE 3',60,110);
+
+  // Startup name
+  ctx.fillStyle='#e8f0ff'; ctx.font='bold 64px sans-serif'; ctx.fillText(brief.name||'Startup',60,210);
+  ctx.fillStyle='rgba(136,153,187,0.8)'; ctx.font='18px monospace'; ctx.fillText(`${brief.industry||'—'} · ${brief.stage||'—'}`,60,248);
+
+  // Board score
+  const avgScore=BOARD_RESULTS?(BOARD_RESULTS.reduce((s,r)=>s+(r.result.score||5),0)/BOARD_RESULTS.length).toFixed(1):'—';
+  ctx.fillStyle='rgba(8,13,31,0.9)'; roundRect(ctx,60,290,240,120,12); ctx.fill();
+  ctx.strokeStyle='rgba(0,212,200,0.3)'; ctx.lineWidth=1; roundRect(ctx,60,290,240,120,12); ctx.stroke();
+  ctx.fillStyle='#00d4c8'; ctx.font='bold 52px sans-serif'; ctx.fillText(avgScore,90,368);
+  ctx.fillStyle='rgba(74,90,128,1)'; ctx.font='12px monospace'; ctx.fillText('BOARD SCORE',90,395);
+
+  // Blind spot score
+  const bss=bsData?.overallScore?.toFixed(1)||'—';
+  const bssColor=bsData?.overallScore>=7?'#ff4d6d':bsData?.overallScore>=4?'#ffb340':'#00e5a0';
+  ctx.fillStyle='rgba(8,13,31,0.9)'; roundRect(ctx,330,290,240,120,12); ctx.fill();
+  ctx.strokeStyle=bssColor+'44'; ctx.lineWidth=1; roundRect(ctx,330,290,240,120,12); ctx.stroke();
+  ctx.fillStyle=bssColor; ctx.font='bold 52px sans-serif'; ctx.fillText(bss,360,368);
+  ctx.fillStyle='rgba(74,90,128,1)'; ctx.font='12px monospace'; ctx.fillText('BLIND SPOT™',360,395);
+
+  // Investor verdict
+  const vd=verdictData?.decision||'—';
+  const vdColor={'FUND':'#00e5a0','FUND WITH CONDITIONS':'#ffb340','PASS':'#ff4d6d'}[vd]||'#ffb340';
+  ctx.fillStyle='rgba(8,13,31,0.9)'; roundRect(ctx,600,290,500,120,12); ctx.fill();
+  ctx.strokeStyle=vdColor+'44'; ctx.lineWidth=1; roundRect(ctx,600,290,500,120,12); ctx.stroke();
+  ctx.fillStyle=vdColor; ctx.font='bold 28px sans-serif'; ctx.fillText(vd,630,360);
+  ctx.fillStyle='rgba(74,90,128,1)'; ctx.font='12px monospace'; ctx.fillText('MARCUS REID · INVESTOR VERDICT',630,393);
+
+  // Critical finding
+  if(SYNTHESIS?.criticalFinding){
+    ctx.fillStyle='rgba(8,13,31,0.8)'; roundRect(ctx,60,440,1080,120,12); ctx.fill();
+    ctx.strokeStyle='rgba(255,77,109,0.3)'; ctx.lineWidth=1; roundRect(ctx,60,440,1080,120,12); ctx.stroke();
+    ctx.fillStyle='#ff4d6d'; ctx.font='12px monospace'; ctx.fillText('CRITICAL FINDING',90,472);
+    ctx.fillStyle='rgba(232,240,255,0.85)'; ctx.font='16px sans-serif';
+    const finding=SYNTHESIS.criticalFinding.substring(0,120)+(SYNTHESIS.criticalFinding.length>120?'...':'');
+    wrapText(ctx,finding,90,502,1000,22);
+  }
+
+  // Bottom brand
+  ctx.fillStyle='rgba(74,90,128,0.6)'; ctx.font='13px monospace'; ctx.fillText('founderverse.ai · AI Board of Directors · Phase 3',60,590);
+
+  const url=canvas.toDataURL('image/png');
+  const a=document.createElement('a'); a.href=url; a.download=`${(brief.name||'startup').replace(/\s+/g,'-').toLowerCase()}-board-report.png`; a.click();
+  showToast('✓ Simulation card downloaded!','#00e5a0');
+}
+
+function roundRect(ctx,x,y,w,h,r){ ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath(); }
+function wrapText(ctx,text,x,y,maxW,lineH){ const words=text.split(' ');let line=''; words.forEach(w=>{ const test=line+w+' '; if(ctx.measureText(test).width>maxW&&line!==''){ ctx.fillText(line,x,y); line=w+' '; y+=lineH; }else line=test; }); ctx.fillText(line,x,y); }
+
+function downloadReport() {
+  if(!CURRENT_ANALYSIS){ showToast('Run a simulation first.'); return; }
+  const {brief,synthesis,bsData,verdictData}=CURRENT_ANALYSIS;
+  const content=`FOUNDERVERSE AI — BOARD REPORT
+Phase 3 · AI Startup Accountability System
+Generated: ${new Date().toLocaleDateString()}
+Simulation ID: FV-${Date.now().toString(36).toUpperCase().slice(-8)}
+
+════════════════════════════════
+STARTUP: ${brief.name||'—'}
+Industry: ${brief.industry} · Revenue: ${brief.revenue} · Stage: ${brief.stage}
+
+CRITICAL FINDING
+${synthesis?.criticalFinding||'—'}
+
+BOARD EXECUTIVE SUMMARY
+${synthesis?.narrative||'—'}
+
+BLIND SPOT SCORE™: ${bsData?.overallScore?.toFixed(1)||'—'}/10 — ${bsData?.zone||'—'}
+${bsData?.benchmark||''}
+
+INVESTOR VERDICT: ${verdictData?.decision||'—'}
+Investment: ${verdictData?.investmentAmount||'—'} · Valuation: ${verdictData?.valuation||'—'}
+
+WHAT CHANGES MARCUS REID'S MIND:
+${verdictData?.whatChangesMyMind||'—'}
+
+BOARD DIRECTIVES:
+${(verdictData?.directives||[]).map((d,i)=>`${i+1}. [Per ${d.attributedTo}] ${d.action} — ${d.deadline}`).join('\n')}
+
+════════════════════════════════
+founderverse.ai · Phase 3
+`;
+  const blob=new Blob([content],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`${(brief.name||'startup').replace(/\s+/g,'-')}-board-report.txt`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── FORM STATE ────────────────────────────────────────────────
+function updateForm() {
+  const fields=['f-name','f-problem','f-solution','f-industry','f-revenue','f-customer','f-stage'];
+  const vals=fields.map(id=>document.getElementById(id)?.value.trim()||'');
+  const filled=vals.filter(v=>v!=='').length;
+  const pct=Math.round((filled/fields.length)*100);
+  const bar=document.getElementById('formProgress'); const lbl=document.getElementById('progressPct');
+  if(bar) bar.style.width=pct+'%'; if(lbl) lbl.textContent=pct+'%';
+  const totalChars=vals.join('').length;
+  const sq=document.getElementById('simQuality');
+  if(sq){ if(pct<30){sq.textContent='WEAK — Add more detail';sq.style.color='var(--coral)';}
+    else if(pct<60){sq.textContent='MODERATE — Keep going';sq.style.color='var(--amber)';}
+    else if(pct<85){sq.textContent='STRONG — Almost there';sq.style.color='var(--teal)';}
+    else{sq.textContent=totalChars>400?'PRECISE — Board is ready':'STRONG — Add more detail';sq.style.color='var(--mint)';} }
+}
+
+function updateChar() { const el=document.getElementById('f-advantage'); const cc=document.getElementById('charCount'); if(el&&cc) cc.textContent=el.value.length+' / 500'; }
+
+function getBrief() {
+  return {name:document.getElementById('f-name')?.value.trim()||'',problem:document.getElementById('f-problem')?.value.trim()||'',solution:document.getElementById('f-solution')?.value.trim()||'',industry:document.getElementById('f-industry')?.value||'',revenue:document.getElementById('f-revenue')?.value||'',customer:document.getElementById('f-customer')?.value.trim()||'',stage:document.getElementById('f-stage')?.value||'',competitor:document.getElementById('f-competitor')?.value.trim()||'',advantage:document.getElementById('f-advantage')?.value.trim()||''};
+}
+
+function fillDemoForm() {
+  const d=DEMO_BRIEF; const s=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
+  s('f-name',d.name);s('f-problem',d.problem);s('f-solution',d.solution);s('f-industry',d.industry);s('f-revenue',d.revenue);s('f-customer',d.customer);s('f-stage',d.stage);s('f-competitor',d.competitor);s('f-advantage',d.advantage);
+  updateForm(); updateChar();
+}
+
+// ── SUBMISSION HANDLER ────────────────────────────────────────
+async function handleSubmit() {
+  const brief=getBrief();
+  if(!brief.name) { showToast('Please enter a startup name.'); return; }
+  if(brief.problem.length<20) { showToast('Please describe the problem in more detail.'); return; }
+  if(brief.solution.length<20) { showToast('Please describe your solution in more detail.'); return; }
+  if(!brief.industry) { showToast('Please select an industry.'); return; }
+  if(!brief.revenue) { showToast('Please select a revenue model.'); return; }
+  if(!API_KEY&&!IS_DEMO) { window._pendingBrief=brief; document.getElementById('apiModal').classList.add('open'); return; }
+  runSimulation(brief);
+}
+
+function runDemo() { IS_DEMO=true; API_KEY=''; fillDemoForm(); runSimulation(DEMO_BRIEF); }
+
+// ── API MODAL ─────────────────────────────────────────────────
+function saveKey() {
+  const k=document.getElementById('apiKeyInp')?.value.trim();
+  if(!k||!k.startsWith('sk-')) { showToast('Please enter a valid Anthropic API key.'); return; }
+  API_KEY=k; IS_DEMO=false; document.getElementById('apiModal').classList.remove('open');
+  if(window._pendingBrief) { runSimulation(window._pendingBrief); window._pendingBrief=null; }
+}
+function useDemo() { IS_DEMO=true; API_KEY=''; document.getElementById('apiModal').classList.remove('open'); if(window._pendingBrief){runSimulation(window._pendingBrief);window._pendingBrief=null;}else runDemo(); }
+function toggleEye() { const i=document.getElementById('apiKeyInp'); if(i) i.type=i.type==='password'?'text':'password'; }
+
+// ── TOAST ─────────────────────────────────────────────────────
+function showToast(msg,color='') {
+  const t=document.getElementById('toast'); if(!t) return;
+  t.textContent=msg; if(color){t.style.background=color+'11';t.style.borderColor=color+'44';t.style.color=color;}
+  else{t.style.background='rgba(255,77,109,0.1)';t.style.borderColor='rgba(255,77,109,0.35)';t.style.color='var(--coral)';}
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),4500);
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────
+function goTo(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); const el=document.getElementById(id); if(el){el.classList.add('active');window.scrollTo(0,0);} }
+
+// ── CURSOR ────────────────────────────────────────────────────
+const CUR=document.getElementById('cursor'); const CGLOW=document.getElementById('cglow');
+document.addEventListener('mousemove',e=>{ if(CUR){CUR.style.left=e.clientX+'px';CUR.style.top=e.clientY+'px';} if(CGLOW){CGLOW.style.left=e.clientX+'px';CGLOW.style.top=e.clientY+'px';} });
+document.addEventListener('mousedown',()=>CUR?.classList.add('hover'));
+document.addEventListener('mouseup',()=>CUR?.classList.remove('hover'));
+
+// ── PARTICLES ────────────────────────────────────────────────
+function makeParticles() {
+  const c=document.getElementById('particles'); if(!c) return;
+  const cols=['rgba(0,212,200,','rgba(0,229,160,','rgba(139,131,232,','rgba(0,245,228,'];
+  for(let i=0;i<32;i++){ const p=document.createElement('div'); p.className='pt'; const sz=Math.random()*2.5+0.5; const col=cols[Math.floor(Math.random()*cols.length)]; p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;background:${col}${(Math.random()*.5+.2).toFixed(2)});animation-duration:${Math.random()*18+14}s;animation-delay:-${Math.random()*20}s;--dx:${(Math.random()-.5)*220}px`; c.appendChild(p); }
+}
+
+// ── LANDING GRID ──────────────────────────────────────────────
+function buildLandingGrid() {
+  const g=document.getElementById('landingGrid'); if(!g) return;
+  AGENTS.forEach(a=>{ const c=document.createElement('div'); c.className='ap-card'; c.style.background=a.bg.replace('0.1','0.05'); c.onmouseenter=()=>{c.style.borderColor=a.color+'44';c.style.background=a.bg;}; c.onmouseleave=()=>{c.style.borderColor='';c.style.background=a.bg.replace('0.1','0.05');}; c.innerHTML=`<div class="ap-av" style="background:${a.bg};color:${a.color}">${a.init}<div class="ap-ring" style="border-color:${a.color}"></div></div><div class="ap-name" style="color:${a.color}">${a.name}</div><div class="ap-role" style="color:${a.color}77">${a.role} · ${a.archetype}</div><div class="ap-quote">${a.voice}</div>`; g.appendChild(c); });
+}
+
+// ── CHIPS ─────────────────────────────────────────────────────
+function buildChips() {
+  const c=document.getElementById('boardChips'); if(!c) return;
+  AGENTS.forEach(a=>{ const ch=document.createElement('span'); ch.className='chip'; ch.style.background=a.bg.replace('0.1','0.07'); ch.style.color=a.color; ch.style.borderColor=a.color+'33'; ch.innerHTML=`<span class="chip-av" style="background:${a.bg};color:${a.color}">${a.init}</span>${a.role}`; c.appendChild(ch); });
+}
+
+// ── UTILITY ───────────────────────────────────────────────────
+function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+// ── INIT ──────────────────────────────────────────────────────
+makeParticles();
+buildLandingGrid();
+buildChips();
+updateForm();
+</script>
+</body>
+</html>

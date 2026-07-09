@@ -168,3 +168,105 @@ If you'd like to collaborate, provide feedback, or discuss the project, feel fre
 **FounderVerse**
 
 *Strategic Intelligence for Founders.*
+
+
+**Your 7 Board Members**
+# Founder-X — Product & Vision
+
+Uses
+
+Product Intelligence
+Market Intelligence
+
+Focus
+
+Product vision
+Differentiation
+Innovation
+Founder thinking
+
+
+## Atlas — Operations
+
+Uses
+
+Operational Intelligence
+Risk Intelligence
+
+Focus
+
+Execution
+Scaling
+Team
+Processes
+
+## Pulse — Customer
+
+Uses
+
+Customer Intelligence
+
+Focus
+
+Customer pain
+UX
+Adoption
+Retention
+
+
+## Forge — Growth
+
+Uses
+
+Growth Intelligence
+Market Intelligence
+
+Focus
+
+GTM
+Marketing
+Growth loops
+Distribution
+
+
+## Rival-X — Competition
+
+Uses
+
+Competitive Intelligence
+Market Intelligence
+
+Focus
+
+Competitors
+Moats
+Positioning
+
+## NEXUS — Chief of Staff
+
+Uses
+
+Decision Intelligence
+
+Focus
+
+Combine all opinions
+Find conflicts
+Generate executive summary
+Build action plan
+
+
+## ORACLE — Investment Committee
+
+Uses
+
+Investment Intelligence
+Financial Intelligence
+Risk Intelligence
+
+Focus
+
+Fundability
+Unit economics
+Capital efficiency
+Final investment recommendation
